@@ -52,6 +52,20 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Категория:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="book-category" value="mama" checked>
+                            Уговорка с Мама
+                        </label>
+                        <label>
+                            <input type="radio" name="book-category" value="yavor">
+                            Уговорка с Явор
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label>Тип:</label>
                     <div class="radio-group">
                         <label>
@@ -90,6 +104,13 @@
         <!-- Books list -->
         <div class="tab-content books-section" id="book-list">
             <h2>Списък с книги</h2>
+            
+            <!-- Category filter -->
+            <div class="filter-container">
+                <button class="filter-btn active" data-category="all">Всички</button>
+                <button class="filter-btn" data-category="mama">Уговорка с Мама</button>
+                <button class="filter-btn" data-category="yavor">Уговорка с Явор</button>
+            </div>
             
             <!-- Search bar -->
             <div class="search-container">
@@ -161,6 +182,35 @@
             <span class="close">&times;</span>
             <h2 id="logs-modal-title">История на прогреса</h2>
             <div id="logs-list" class="logs-list"></div>
+        </div>
+    </div>
+
+    <!-- Modal for changing category -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Промяна на категория</h2>
+            <p>Книга: <strong id="category-book-name"></strong></p>
+            <input type="hidden" id="category-book-id">
+            
+            <div class="form-group">
+                <label>Избери категория:</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="change-category" value="mama">
+                        Уговорка с Мама
+                    </label>
+                    <label>
+                        <input type="radio" name="change-category" value="yavor">
+                        Уговорка с Явор
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn btn-primary" id="save-category">Запази</button>
+                <button type="button" class="btn btn-secondary" id="cancel-category">Отказ</button>
+            </div>
         </div>
     </div>
 

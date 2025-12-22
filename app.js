@@ -1,11 +1,12 @@
 // Book class to represent each book
 class Book {
-    constructor(id, name, author, type, total) {
+    constructor(id, name, author, type, total, category) {
         this.id = id;
         this.name = name;
         this.author = author;
         this.type = type; // 'paper' or 'audio'
         this.total = total; // total pages or total minutes
+        this.category = category; // 'mama' or 'yavor'
         this.logs = []; // array of {date, amount}
         this.completed = false;
     }
@@ -68,6 +69,21 @@ function setupEventListeners() {
         });
     });
 
+    // Category filter
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Update active state
+            document.querySelectorAll('.filter-btn').forEach(item => {
+                item.classList.remove('active');
+            });
+            e.target.classList.add('active');
+            
+            // Filter books
+            const category = e.target.dataset.category;
+            filterBooksByCategory(category);
+        });
+    });
+
     // Search functionality
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
@@ -104,12 +120,19 @@ function setupEventListeners() {
         closeBtn.addEventListener('click', () => {
             logModal.style.display = 'none';
             logsModal.style.display = 'none';
+            document.getElementById('category-modal').style.display = 'none';
         });
     });
 
     // Cancel log button
     document.getElementById('cancel-log').addEventListener('click', () => {
         logModal.style.display = 'none';
+    });
+
+    // Category modal buttons
+    document.getElementById('save-category').addEventListener('click', changeBookCategory);
+    document.getElementById('cancel-category').addEventListener('click', () => {
+        document.getElementById('category-modal').style.display = 'none';
     });
 
     // Close modal when clicking outside
@@ -119,6 +142,10 @@ function setupEventListeners() {
         }
         if (e.target === logsModal) {
             logsModal.style.display = 'none';
+        }
+        const categoryModal = document.getElementById('category-modal');
+        if (e.target === categoryModal) {
+            categoryModal.style.display = 'none';
         }
     });
 }
@@ -145,6 +172,7 @@ function handleAddBook(e) {
     const name = document.getElementById('book-name').value.trim();
     const author = document.getElementById('book-author').value.trim();
     const type = document.querySelector('input[name="book-type"]:checked').value;
+    const category = document.querySelector('input[name="book-category"]:checked').value;
 
     let total;
     if (type === 'paper') {
@@ -161,7 +189,7 @@ function handleAddBook(e) {
     }
 
     const id = Date.now().toString();
-    const book = new Book(id, name, author, type, total);
+    const book = new Book(id, name, author, type, total, category);
     books.push(book);
     saveBooks();
     renderBooks();
@@ -269,6 +297,37 @@ function openLogsModal(bookId) {
     logsModal.style.display = 'block';
 }
 
+// Open category modal
+function openCategoryModal(bookId) {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    document.getElementById('category-book-id').value = bookId;
+    document.getElementById('category-book-name').textContent = book.name;
+    
+    // Set current category
+    const categoryRadios = document.querySelectorAll('input[name="change-category"]');
+    categoryRadios.forEach(radio => {
+        radio.checked = radio.value === book.category;
+    });
+
+    document.getElementById('category-modal').style.display = 'block';
+}
+
+// Change book category
+function changeBookCategory() {
+    const bookId = document.getElementById('category-book-id').value;
+    const newCategory = document.querySelector('input[name="change-category"]:checked').value;
+    
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    book.category = newCategory;
+    saveBooks();
+    renderBooks();
+    document.getElementById('category-modal').style.display = 'none';
+}
+
 // Toggle book completion
 function toggleBookCompletion(bookId) {
     const book = books.find(b => b.id === bookId);
@@ -298,10 +357,35 @@ function renderBooks() {
         emptyState.style.display = 'none';
         booksList.innerHTML = '';
 
-        books.forEach(book => {
-            const bookCard = createBookCard(book);
-            booksList.appendChild(bookCard);
-        });
+        // Group books by category
+        const mamaBooks = books.filter(book => book.category === 'mama');
+        const yavorBooks = books.filter(book => book.category === 'yavor');
+
+        // Render Mama category
+        if (mamaBooks.length > 0) {
+            const mamaSection = document.createElement('div');
+            mamaSection.className = 'category-section';
+            mamaSection.innerHTML = '<h3 class="category-title">📚 Уговорка с Мама</h3>';
+            booksList.appendChild(mamaSection);
+
+            mamaBooks.forEach(book => {
+                const bookCard = createBookCard(book);
+                booksList.appendChild(bookCard);
+            });
+        }
+
+        // Render Yavor category
+        if (yavorBooks.length > 0) {
+            const yavorSection = document.createElement('div');
+            yavorSection.className = 'category-section';
+            yavorSection.innerHTML = '<h3 class="category-title">📚 Уговорка с Явор</h3>';
+            booksList.appendChild(yavorSection);
+
+            yavorBooks.forEach(book => {
+                const bookCard = createBookCard(book);
+                booksList.appendChild(bookCard);
+            });
+        }
     }
 
     // Render completed books
@@ -366,6 +450,7 @@ function createBookCard(book) {
             </div>
             <div class="book-actions">
                 <button class="btn btn-success" onclick="openLogModal('${book.id}')">+ Прогрес</button>
+                <button class="btn btn-category" onclick="openCategoryModal('${book.id}')" title="Промени категория">📁</button>
                 <button class="btn btn-complete" onclick="toggleBookCompletion('${book.id}')">
                     ${book.completed ? '↩️ Незавършена' : '✓ Завършена'}
                 </button>
@@ -501,7 +586,7 @@ function loadBooks() {
     if (saved) {
         const parsed = JSON.parse(saved);
         books = parsed.map(data => {
-            const book = new Book(data.id, data.name, data.author, data.type, data.total);
+            const book = new Book(data.id, data.name, data.author, data.type, data.total, data.category || 'mama');
             book.logs = data.logs || [];
             book.completed = data.completed || false;
             return book;
@@ -594,5 +679,39 @@ function handleSearchCompleted(e) {
         completedEmptyState.textContent = 'Все още няма завършени книги. 🎉';
     } else {
         completedEmptyState.style.display = 'none';
+    }
+}
+
+// Filter books by category
+function filterBooksByCategory(category) {
+    const categorySections = document.querySelectorAll('.category-section');
+    const bookCards = document.querySelectorAll('#books-list .book-card');
+    
+    if (category === 'all') {
+        // Show all
+        categorySections.forEach(section => section.style.display = 'block');
+        bookCards.forEach(card => card.style.display = 'block');
+    } else {
+        // Hide all first
+        categorySections.forEach(section => section.style.display = 'none');
+        bookCards.forEach(card => card.style.display = 'none');
+        
+        // Show only selected category
+        categorySections.forEach((section, index) => {
+            const title = section.querySelector('.category-title').textContent;
+            if ((category === 'mama' && title.includes('Мама')) || 
+                (category === 'yavor' && title.includes('Явор'))) {
+                section.style.display = 'block';
+                
+                // Show books after this section until next section
+                let nextElement = section.nextElementSibling;
+                while (nextElement && !nextElement.classList.contains('category-section')) {
+                    if (nextElement.classList.contains('book-card')) {
+                        nextElement.style.display = 'block';
+                    }
+                    nextElement = nextElement.nextElementSibling;
+                }
+            }
+        });
     }
 }
