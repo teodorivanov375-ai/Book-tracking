@@ -30,11 +30,17 @@
             </div>
         </div>
 
-        <!-- Tab Navigation -->
-        <div class="tabs">
-            <button class="tab-btn" data-tab="add-book">➕ Добави книга</button>
-            <button class="tab-btn active" data-tab="book-list">📖 Списък с книги</button>
-            <button class="tab-btn" data-tab="completed-books">✅ Завършени книги</button>
+        <!-- Menu Navigation -->
+        <div class="menu-container">
+            <button class="menu-btn" id="menu-btn">
+                <img src="images/ic_menu.svg" alt="Menu" class="menu-icon">
+                <span>Меню</span>
+            </button>
+            <div class="menu-dropdown" id="menu-dropdown">
+                <button class="menu-item" data-tab="add-book">➕ Добави книга</button>
+                <button class="menu-item active" data-tab="book-list">📖 Списък с книги</button>
+                <button class="menu-item" data-tab="completed-books">✅ Завършени книги</button>
+            </div>
         </div>
 
         <!-- Form for adding a new book -->

@@ -54,11 +54,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Tab switching
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    // Menu button toggle
+    const menuBtn = document.getElementById('menu-btn');
+    const menuDropdown = document.getElementById('menu-dropdown');
+    
+    menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menuDropdown.classList.toggle('show');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!menuDropdown.contains(e.target) && e.target !== menuBtn) {
+            menuDropdown.classList.remove('show');
+        }
+    });
+
+    // Menu item switching
+    document.querySelectorAll('.menu-item').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const tabName = e.target.dataset.tab;
             switchTab(tabName);
+            menuDropdown.classList.remove('show');
+            
+            // Update active state
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            e.target.classList.add('active');
         });
     });
 
@@ -119,14 +142,6 @@ function setupEventListeners() {
 
 // Switch between tabs
 function switchTab(tabName) {
-    // Update tab buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.tab === tabName) {
-            btn.classList.add('active');
-        }
-    });
-
     // Update tab content
     document.querySelectorAll('.tab-content').forEach(content => {
         content.classList.remove('active');
