@@ -279,14 +279,14 @@ header h1 {
 }
 
 .btn-success {
-    background: #28a745;
+    background: #17a2b8;
     color: white;
     padding: 8px 15px;
     font-size: 14px;
 }
 
 .btn-success:hover {
-    background: #218838;
+    background: #138496;
 }
 
 .btn-danger {
@@ -301,14 +301,14 @@ header h1 {
 }
 
 .btn-complete {
-    background: #17a2b8;
+    background: #28a745;
     color: white;
     padding: 8px 15px;
     font-size: 14px;
 }
 
 .btn-complete:hover {
-    background: #138496;
+    background: #218838;
 }
 
 /* Books Section */
