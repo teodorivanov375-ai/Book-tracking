@@ -54,31 +54,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Setup event listeners
 function setupEventListeners() {
-    // Menu button toggle
-    const menuBtn = document.getElementById('menu-btn');
-    const menuDropdown = document.getElementById('menu-dropdown');
-    
-    menuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        menuDropdown.classList.toggle('show');
-    });
-
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
-            menuDropdown.classList.remove('show');
-        }
-    });
-
-    // Menu item switching
-    document.querySelectorAll('.menu-item').forEach(btn => {
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const tabName = e.target.dataset.tab;
             switchTab(tabName);
-            menuDropdown.classList.remove('show');
             
             // Update active state
-            document.querySelectorAll('.menu-item').forEach(item => {
+            document.querySelectorAll('.tab-btn').forEach(item => {
                 item.classList.remove('active');
             });
             e.target.classList.add('active');
