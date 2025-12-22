@@ -259,14 +259,14 @@ header h1 {
 }
 
 .btn-primary {
-    background: #52b788;
+    background: #28a745;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #40916c;
+    background: #218838;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(82, 183, 136, 0.4);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
 }
 
 .btn-secondary {
