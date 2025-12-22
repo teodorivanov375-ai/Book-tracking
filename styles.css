@@ -107,7 +107,7 @@ header h1 {
 
 .tab-btn.active {
     background: white;
-    color: #667eea;
+    color: #52b788;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);
 }
@@ -252,14 +252,14 @@ header h1 {
 }
 
 .btn-primary {
-    background: #667eea;
+    background: #52b788;
     color: white;
 }
 
 .btn-primary:hover {
-    background: #5568d3;
+    background: #40916c;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(82, 183, 136, 0.4);
 }
 
 .btn-secondary {
