@@ -65,7 +65,7 @@ function setupEventListeners() {
 
     // Close menu when clicking outside
     document.addEventListener('click', (e) => {
-        if (!menuDropdown.contains(e.target) && e.target !== menuBtn) {
+        if (!menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
             menuDropdown.classList.remove('show');
         }
     });
