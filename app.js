@@ -333,9 +333,23 @@ function toggleBookCompletion(bookId) {
     const book = books.find(b => b.id === bookId);
     if (!book) return;
 
+    // If marking as completed, ensure progress is 100%
+    if (!book.completed) {
+        const remaining = book.getRemainingAmount();
+        if (remaining > 0) {
+            // Add remaining amount as a log entry for today
+            const today = new Date().toISOString().split('T')[0];
+            book.logs.push({ date: today, amount: remaining });
+            book.logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+    }
+
     book.completed = !book.completed;
     saveBooks();
+    updateStreaks();
+    saveStreaks();
     renderBooks();
+    renderStreakDisplay();
 }
 
 // Delete book
