@@ -27,6 +27,8 @@ class Book {
 
 // Application state
 let books = [];
+let currentStreak = 0;
+let longestStreak = 0;
 
 // DOM elements
 const addBookForm = document.getElementById('add-book-form');
@@ -43,7 +45,10 @@ const logAudioField = document.getElementById('log-audio-field');
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     loadBooks();
+    loadStreaks();
+    updateStreaks();
     renderBooks();
+    renderStreakDisplay();
     setupEventListeners();
 });
 
@@ -196,7 +201,10 @@ function handleAddLog(e) {
     book.logs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     saveBooks();
+    updateStreaks();
+    saveStreaks();
     renderBooks();
+    renderStreakDisplay();
     logModal.style.display = 'none';
     logForm.reset();
 }
@@ -368,6 +376,101 @@ function createBookCard(book) {
     `;
 
     return card;
+}
+
+// Calculate streaks based on all log dates
+function updateStreaks() {
+    // Get all unique dates from all books
+    const allDates = new Set();
+    
+    books.forEach(book => {
+        book.logs.forEach(log => {
+            allDates.add(log.date);
+        });
+    });
+    
+    if (allDates.size === 0) {
+        currentStreak = 0;
+        longestStreak = 0;
+        return;
+    }
+    
+    // Sort dates in descending order (newest first)
+    const sortedDates = Array.from(allDates).sort((a, b) => new Date(b) - new Date(a));
+    
+    // Calculate current streak
+    currentStreak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < sortedDates.length; i++) {
+        const logDate = new Date(sortedDates[i]);
+        logDate.setHours(0, 0, 0, 0);
+        
+        const expectedDate = new Date(today);
+        expectedDate.setDate(today.getDate() - i);
+        
+        if (logDate.getTime() === expectedDate.getTime()) {
+            currentStreak++;
+        } else {
+            break;
+        }
+    }
+    
+    // Calculate longest streak
+    let tempStreak = 1;
+    let maxStreak = 1;
+    
+    for (let i = 0; i < sortedDates.length - 1; i++) {
+        const currentDate = new Date(sortedDates[i]);
+        const nextDate = new Date(sortedDates[i + 1]);
+        currentDate.setHours(0, 0, 0, 0);
+        nextDate.setHours(0, 0, 0, 0);
+        
+        const diffDays = Math.round((currentDate - nextDate) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 1) {
+            tempStreak++;
+            if (tempStreak > maxStreak) {
+                maxStreak = tempStreak;
+            }
+        } else {
+            tempStreak = 1;
+        }
+    }
+    
+    longestStreak = Math.max(longestStreak, maxStreak, currentStreak);
+}
+
+// Save streaks to localStorage
+function saveStreaks() {
+    localStorage.setItem('streaks', JSON.stringify({
+        currentStreak,
+        longestStreak
+    }));
+}
+
+// Load streaks from localStorage
+function loadStreaks() {
+    const saved = localStorage.getItem('streaks');
+    if (saved) {
+        const streaks = JSON.parse(saved);
+        currentStreak = streaks.currentStreak || 0;
+        longestStreak = streaks.longestStreak || 0;
+    }
+}
+
+// Render streak display
+function renderStreakDisplay() {
+    const currentStreakEl = document.getElementById('current-streak');
+    const longestStreakEl = document.getElementById('longest-streak');
+    
+    if (currentStreakEl) {
+        currentStreakEl.textContent = currentStreak;
+    }
+    if (longestStreakEl) {
+        longestStreakEl.textContent = longestStreak;
+    }
 }
 
 // Save books to localStorage
