@@ -366,8 +366,8 @@ header h1 {
 }
 
 .type-badge.audio {
-    background: #f3e5f5;
-    color: #7b1fa2;
+    background: #ffe0b2;
+    color: #e65100;
 }
 
 .book-actions {
@@ -398,7 +398,7 @@ header h1 {
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(90deg, #dc3545 0%, #fd7e14 25%, #ffc107 50%, #90ee90 75%, #28a745 100%);
     transition: width 0.5s ease;
     display: flex;
     align-items: center;
@@ -409,7 +409,7 @@ header h1 {
 }
 
 .book-card.completed .progress-bar {
-    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+    background: linear-gradient(90deg, #dc3545 0%, #fd7e14 25%, #ffc107 50%, #90ee90 75%, #28a745 100%);
 }
 
 .logs-summary {
