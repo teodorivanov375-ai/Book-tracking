@@ -49,6 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Setup event listeners
 function setupEventListeners() {
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const tabName = e.target.dataset.tab;
+            switchTab(tabName);
+        });
+    });
+
     // Search functionality
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
@@ -98,6 +106,29 @@ function setupEventListeners() {
     });
 }
 
+// Switch between tabs
+function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.tab === tabName) {
+            btn.classList.add('active');
+        }
+    });
+
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+        content.style.display = 'none';
+    });
+
+    const activeTab = document.getElementById(tabName);
+    if (activeTab) {
+        activeTab.classList.add('active');
+        activeTab.style.display = 'block';
+    }
+}
+
 // Handle add book
 function handleAddBook(e) {
     e.preventDefault();
@@ -126,6 +157,9 @@ function handleAddBook(e) {
     saveBooks();
     renderBooks();
     addBookForm.reset();
+    
+    // Switch to book list tab after adding
+    switchTab('book-list');
 }
 
 // Handle add log
