@@ -112,6 +112,13 @@ header h1 {
     transform: translateY(-2px);
 }
 
+.tab-icon {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
 .tab-btn[data-tab="add-book"] .add-icon {
     display: inline-block;
     font-weight: bold;
