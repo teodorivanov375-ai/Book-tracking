@@ -659,6 +659,62 @@ header h1 {
     margin-top: 10px;
 }
 
+/* Chart/Calendar Styles */
+.chart-container {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.month-section {
+    margin-bottom: 30px;
+}
+
+.month-title {
+    font-size: 1.4em;
+    color: #667eea;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.days-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.day-circle {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #e8f5e9;
+    border: 2px solid #b2dfdb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.day-circle:hover {
+    background: #c8e6c9;
+    border-color: #81c784;
+    transform: scale(1.1);
+}
+
+.day-circle.active {
+    background: #4caf50;
+    border-color: #388e3c;
+    color: white;
+}
+
+.day-circle span {
+    font-size: 14px;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
     header h1 {
