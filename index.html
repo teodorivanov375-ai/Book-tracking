@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проследяване на книги</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Моите книги</h1>
+        </header>
+
+        <!-- Form for adding a new book -->
+        <div class="add-book-section">
+            <h2>Добави нова книга</h2>
+            <form id="add-book-form">
+                <div class="form-group">
+                    <label for="book-name">Име на книга:</label>
+                    <input type="text" id="book-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="book-author">Автор:</label>
+                    <input type="text" id="book-author" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Тип:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="book-type" value="paper" checked>
+                            Хартиена книга
+                        </label>
+                        <label>
+                            <input type="radio" name="book-type" value="audio">
+                            Аудио книга
+                        </label>
+                    </div>
+                </div>
+
+                <div id="paper-fields" class="type-fields">
+                    <div class="form-group">
+                        <label for="total-pages">Брой страници:</label>
+                        <input type="number" id="total-pages" min="1">
+                    </div>
+                </div>
+
+                <div id="audio-fields" class="type-fields" style="display: none;">
+                    <div class="form-group">
+                        <label>Продължителност:</label>
+                        <div class="duration-group">
+                            <input type="number" id="total-hours" min="0" placeholder="Часове" value="0">
+                            <span>:</span>
+                            <input type="number" id="total-minutes" min="0" max="59" placeholder="Минути" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Добави книга</button>
+            </form>
+        </div>
+
+        <!-- Books list -->
+        <div class="books-section">
+            <h2>Списък с книги</h2>
+            <div id="books-list" class="books-list"></div>
+            <div id="empty-state" class="empty-state">
+                Все още няма добавени книги. Добави първата си книга отгоре! 📖
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding progress log -->
+    <div id="log-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Добави прогрес</h2>
+            <form id="log-form">
+                <input type="hidden" id="log-book-id">
+                
+                <div class="form-group">
+                    <label for="log-date">Дата:</label>
+                    <input type="date" id="log-date" required>
+                </div>
+
+                <div id="log-paper-field" class="form-group">
+                    <label for="log-pages">Прочетени страници:</label>
+                    <input type="number" id="log-pages" min="1">
+                </div>
+
+                <div id="log-audio-field" class="form-group" style="display: none;">
+                    <label>Време на слушане:</label>
+                    <div class="duration-group">
+                        <input type="number" id="log-hours" min="0" placeholder="Часове" value="0">
+                        <span>:</span>
+                        <input type="number" id="log-minutes" min="0" max="59" placeholder="Минути" value="0">
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Добави</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-log">Отказ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for viewing logs -->
+    <div id="logs-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="logs-modal-title">История на прогреса</h2>
+            <div id="logs-list" class="logs-list"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+// Book class to represent each book
+class Book {
+    constructor(id, name, author, type, total) {
+        this.id = id;
+        this.name = name;
+        this.author = author;
+        this.type = type; // 'paper' or 'audio'
+        this.total = total; // total pages or total minutes
+        this.logs = []; // array of {date, amount}
+        this.completed = false;
+    }
+
+    getTotalProgress() {
+        return this.logs.reduce((sum, log) => sum + log.amount, 0);
+    }
+
+    getProgressPercentage() {
+        if (this.total === 0) return 0;
+        const progress = this.getTotalProgress();
+        return Math.min(Math.round((progress / this.total) * 100), 100);
+    }
+
+    getRemainingAmount() {
+        return Math.max(this.total - this.getTotalProgress(), 0);
+    }
+}
+
+// Application state
+let books = [];
+
+// DOM elements
+const addBookForm = document.getElementById('add-book-form');
+const booksList = document.getElementById('books-list');
+const emptyState = document.getElementById('empty-state');
+const paperFields = document.getElementById('paper-fields');
+const audioFields = document.getElementById('audio-fields');
+const logModal = document.getElementById('log-modal');
+const logsModal = document.getElementById('logs-modal');
+const logForm = document.getElementById('log-form');
+const logPaperField = document.getElementById('log-paper-field');
+const logAudioField = document.getElementById('log-audio-field');
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', () => {
+    loadBooks();
+    renderBooks();
+    setupEventListeners();
+});
+
+// Setup event listeners
+function setupEventListeners() {
+    // Toggle between paper and audio fields
+    document.querySelectorAll('input[name="book-type"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'paper') {
+                paperFields.style.display = 'block';
+                audioFields.style.display = 'none';
+            } else {
+                paperFields.style.display = 'none';
+                audioFields.style.display = 'block';
+            }
+        });
+    });
+
+    // Add book form submission
+    addBookForm.addEventListener('submit', handleAddBook);
+
+    // Log form submission
+    logForm.addEventListener('submit', handleAddLog);
+
+    // Modal close buttons
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', () => {
+            logModal.style.display = 'none';
+            logsModal.style.display = 'none';
+        });
+    });
+
+    // Cancel log button
+    document.getElementById('cancel-log').addEventListener('click', () => {
+        logModal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === logModal) {
+            logModal.style.display = 'none';
+        }
+        if (e.target === logsModal) {
+            logsModal.style.display = 'none';
+        }
+    });
+}
+
+// Handle add book
+function handleAddBook(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('book-name').value.trim();
+    const author = document.getElementById('book-author').value.trim();
+    const type = document.querySelector('input[name="book-type"]:checked').value;
+
+    let total;
+    if (type === 'paper') {
+        total = parseInt(document.getElementById('total-pages').value) || 0;
+    } else {
+        const hours = parseInt(document.getElementById('total-hours').value) || 0;
+        const minutes = parseInt(document.getElementById('total-minutes').value) || 0;
+        total = hours * 60 + minutes;
+    }
+
+    if (!name || !author || total <= 0) {
+        alert('Моля, попълнете всички полета!');
+        return;
+    }
+
+    const id = Date.now().toString();
+    const book = new Book(id, name, author, type, total);
+    books.push(book);
+    saveBooks();
+    renderBooks();
+    addBookForm.reset();
+}
+
+// Handle add log
+function handleAddLog(e) {
+    e.preventDefault();
+
+    const bookId = document.getElementById('log-book-id').value;
+    const date = document.getElementById('log-date').value;
+    
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    let amount;
+    if (book.type === 'paper') {
+        amount = parseInt(document.getElementById('log-pages').value) || 0;
+    } else {
+        const hours = parseInt(document.getElementById('log-hours').value) || 0;
+        const minutes = parseInt(document.getElementById('log-minutes').value) || 0;
+        amount = hours * 60 + minutes;
+    }
+
+    if (amount <= 0) {
+        alert('Моля, въведете валидна стойност!');
+        return;
+    }
+
+    book.logs.push({ date, amount });
+    book.logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    saveBooks();
+    renderBooks();
+    logModal.style.display = 'none';
+    logForm.reset();
+}
+
+// Open log modal
+function openLogModal(bookId) {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    document.getElementById('log-book-id').value = bookId;
+    document.getElementById('log-date').valueAsDate = new Date();
+
+    if (book.type === 'paper') {
+        logPaperField.style.display = 'block';
+        logAudioField.style.display = 'none';
+    } else {
+        logPaperField.style.display = 'none';
+        logAudioField.style.display = 'block';
+    }
+
+    logModal.style.display = 'block';
+}
+
+// Open logs history modal
+function openLogsModal(bookId) {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    document.getElementById('logs-modal-title').textContent = `История на прогреса: ${book.name}`;
+    
+    const logsList = document.getElementById('logs-list');
+    logsList.innerHTML = '';
+
+    if (book.logs.length === 0) {
+        logsList.innerHTML = '<div class="no-logs">Все още няма записан прогрес</div>';
+    } else {
+        book.logs.forEach(log => {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const dateFormatted = new Date(log.date).toLocaleDateString('bg-BG', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            let amountText;
+            if (book.type === 'paper') {
+                amountText = `${log.amount} страници`;
+            } else {
+                const hours = Math.floor(log.amount / 60);
+                const minutes = log.amount % 60;
+                amountText = hours > 0 ? `${hours}ч ${minutes}мин` : `${minutes}мин`;
+            }
+
+            logEntry.innerHTML = `
+                <span class="log-date">${dateFormatted}</span>
+                <span class="log-amount">${amountText}</span>
+            `;
+            logsList.appendChild(logEntry);
+        });
+    }
+
+    logsModal.style.display = 'block';
+}
+
+// Toggle book completion
+function toggleBookCompletion(bookId) {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    book.completed = !book.completed;
+    saveBooks();
+    renderBooks();
+}
+
+// Delete book
+function deleteBook(bookId) {
+    if (confirm('Сигурни ли сте, че искате да изтриете тази книга?')) {
+        books = books.filter(b => b.id !== bookId);
+        saveBooks();
+        renderBooks();
+    }
+}
+
+// Render books list
+function renderBooks() {
+    if (books.length === 0) {
+        booksList.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+    }
+
+    emptyState.style.display = 'none';
+    booksList.innerHTML = '';
+
+    books.forEach(book => {
+        const bookCard = createBookCard(book);
+        booksList.appendChild(bookCard);
+    });
+}
+
+// Create book card element
+function createBookCard(book) {
+    const card = document.createElement('div');
+    card.className = `book-card ${book.completed ? 'completed' : ''}`;
+
+    const progress = book.getTotalProgress();
+    const percentage = book.getProgressPercentage();
+    const remaining = book.getRemainingAmount();
+
+    let totalText, progressText, remainingText;
+    if (book.type === 'paper') {
+        totalText = `${book.total} страници`;
+        progressText = `${progress} прочетени`;
+        remainingText = `${remaining} остават`;
+    } else {
+        const totalHours = Math.floor(book.total / 60);
+        const totalMinutes = book.total % 60;
+        totalText = totalHours > 0 ? `${totalHours}ч ${totalMinutes}мин` : `${totalMinutes}мин`;
+
+        const progressHours = Math.floor(progress / 60);
+        const progressMinutes = progress % 60;
+        progressText = progressHours > 0 ? `${progressHours}ч ${progressMinutes}мин изслушани` : `${progressMinutes}мин изслушани`;
+
+        const remainingHours = Math.floor(remaining / 60);
+        const remainingMinutes = remaining % 60;
+        remainingText = remainingHours > 0 ? `${remainingHours}ч ${remainingMinutes}мин остават` : `${remainingMinutes}мин остават`;
+    }
+
+    card.innerHTML = `
+        <div class="book-header">
+            <div class="book-info">
+                <h3>${book.name}</h3>
+                <div class="author">от ${book.author}</div>
+                <span class="type-badge ${book.type}">
+                    ${book.type === 'paper' ? '📖 Хартиена' : '🎧 Аудио'} • ${totalText}
+                </span>
+            </div>
+            <div class="book-actions">
+                <button class="btn btn-success" onclick="openLogModal('${book.id}')">+ Прогрес</button>
+                <button class="btn btn-complete" onclick="toggleBookCompletion('${book.id}')">
+                    ${book.completed ? '↩️ Незавършена' : '✓ Завършена'}
+                </button>
+                <button class="btn btn-danger" onclick="deleteBook('${book.id}')">✕</button>
+            </div>
+        </div>
+
+        ${book.completed ? '<div class="completed-badge">✓ Завършена</div>' : ''}
+
+        <div class="progress-section">
+            <div class="progress-info">
+                <span>${progressText}</span>
+                <span>${book.completed ? '100%' : remainingText}</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${percentage}%">
+                    ${percentage}%
+                </div>
+            </div>
+        </div>
+
+        <div class="logs-summary" onclick="openLogsModal('${book.id}')">
+            <span>📊 История на прогреса (${book.logs.length} записа) - Кликни за детайли</span>
+        </div>
+    `;
+
+    return card;
+}
+
+// Save books to localStorage
+function saveBooks() {
+    localStorage.setItem('books', JSON.stringify(books));
+}
+
+// Load books from localStorage
+function loadBooks() {
+    const saved = localStorage.getItem('books');
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        books = parsed.map(data => {
+            const book = new Book(data.id, data.name, data.author, data.type, data.total);
+            book.logs = data.logs || [];
+            book.completed = data.completed || false;
+            return book;
+        });
+    }
+}
