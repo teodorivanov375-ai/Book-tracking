@@ -63,6 +63,12 @@ function setupEventListeners() {
         searchInput.addEventListener('input', handleSearch);
     }
 
+    // Search functionality for completed books
+    const searchCompletedInput = document.getElementById('search-completed-input');
+    if (searchCompletedInput) {
+        searchCompletedInput.addEventListener('input', handleSearchCompleted);
+    }
+
     // Toggle between paper and audio fields
     document.querySelectorAll('input[name="book-type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -278,19 +284,22 @@ function deleteBook(bookId) {
 
 // Render books list
 function renderBooks() {
+    // Render all books
     if (books.length === 0) {
         booksList.innerHTML = '';
         emptyState.style.display = 'block';
-        return;
+    } else {
+        emptyState.style.display = 'none';
+        booksList.innerHTML = '';
+
+        books.forEach(book => {
+            const bookCard = createBookCard(book);
+            booksList.appendChild(bookCard);
+        });
     }
 
-    emptyState.style.display = 'none';
-    booksList.innerHTML = '';
-
-    books.forEach(book => {
-        const bookCard = createBookCard(book);
-        booksList.appendChild(bookCard);
-    });
+    // Render completed books
+    renderCompletedBooks();
 }
 
 // Create book card element
@@ -409,5 +418,61 @@ function handleSearch(e) {
         emptyState.textContent = 'Все още няма добавени книги. Добави първата си книга отгоре! 📖';
     } else {
         emptyState.style.display = 'none';
+    }
+}
+
+// Render completed books
+function renderCompletedBooks() {
+    const completedBooksList = document.getElementById('completed-books-list');
+    const completedEmptyState = document.getElementById('completed-empty-state');
+    
+    const completedBooks = books.filter(book => book.completed);
+    
+    if (completedBooks.length === 0) {
+        completedBooksList.innerHTML = '';
+        completedEmptyState.style.display = 'block';
+        return;
+    }
+    
+    completedEmptyState.style.display = 'none';
+    completedBooksList.innerHTML = '';
+    
+    completedBooks.forEach(book => {
+        const bookCard = createBookCard(book);
+        completedBooksList.appendChild(bookCard);
+    });
+}
+
+// Handle search for completed books
+function handleSearchCompleted(e) {
+    const searchTerm = e.target.value.toLowerCase().trim();
+    
+    const bookCards = document.querySelectorAll('#completed-books-list .book-card');
+    let visibleCount = 0;
+    
+    bookCards.forEach(card => {
+        const bookName = card.querySelector('h3').textContent.toLowerCase();
+        const bookAuthor = card.querySelector('.author').textContent.toLowerCase();
+        
+        if (bookName.includes(searchTerm) || bookAuthor.includes(searchTerm)) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Show/hide empty state
+    const completedEmptyState = document.getElementById('completed-empty-state');
+    const completedBooks = books.filter(book => book.completed);
+    
+    if (visibleCount === 0 && completedBooks.length > 0) {
+        completedEmptyState.style.display = 'block';
+        completedEmptyState.textContent = 'Няма намерени книги за "' + e.target.value + '"';
+    } else if (completedBooks.length === 0) {
+        completedEmptyState.style.display = 'block';
+        completedEmptyState.textContent = 'Все още няма завършени книги. 🎉';
+    } else {
+        completedEmptyState.style.display = 'none';
     }
 }

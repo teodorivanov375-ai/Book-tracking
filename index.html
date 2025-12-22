@@ -16,6 +16,7 @@
         <div class="tabs">
             <button class="tab-btn" data-tab="add-book">➕ Добави книга</button>
             <button class="tab-btn active" data-tab="book-list">📖 Списък с книги</button>
+            <button class="tab-btn" data-tab="completed-books">✅ Завършени книги</button>
         </div>
 
         <!-- Form for adding a new book -->
@@ -81,6 +82,22 @@
             <div id="books-list" class="books-list"></div>
             <div id="empty-state" class="empty-state">
                 Все още няма добавени книги. Добави първата си книга отгоре! 📖
+            </div>
+        </div>
+
+        <!-- Completed books list -->
+        <div class="tab-content books-section" id="completed-books" style="display: none;">
+            <h2>Завършени книги</h2>
+            
+            <!-- Search bar -->
+            <div class="search-container">
+                <img src="images/ic_search.svg" alt="Search" class="search-icon">
+                <input type="text" id="search-completed-input" class="search-input" placeholder="Търси в завършените книги...">
+            </div>
+            
+            <div id="completed-books-list" class="books-list"></div>
+            <div id="completed-empty-state" class="empty-state">
+                Все още няма завършени книги. 🎉
             </div>
         </div>
     </div>
