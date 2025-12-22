@@ -49,6 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Setup event listeners
 function setupEventListeners() {
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
+
     // Toggle between paper and audio fields
     document.querySelectorAll('input[name="book-type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -337,5 +343,37 @@ function loadBooks() {
             book.completed = data.completed || false;
             return book;
         });
+    }
+}
+
+// Handle search
+function handleSearch(e) {
+    const searchTerm = e.target.value.toLowerCase().trim();
+    
+    const bookCards = document.querySelectorAll('.book-card');
+    let visibleCount = 0;
+    
+    bookCards.forEach(card => {
+        const bookName = card.querySelector('h3').textContent.toLowerCase();
+        const bookAuthor = card.querySelector('.author').textContent.toLowerCase();
+        
+        if (bookName.includes(searchTerm) || bookAuthor.includes(searchTerm)) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Show/hide empty state
+    const emptyState = document.getElementById('empty-state');
+    if (visibleCount === 0 && books.length > 0) {
+        emptyState.style.display = 'block';
+        emptyState.textContent = 'Няма намерени книги за "' + e.target.value + '"';
+    } else if (books.length === 0) {
+        emptyState.style.display = 'block';
+        emptyState.textContent = 'Все още няма добавени книги. Добави първата си книга отгоре! 📖';
+    } else {
+        emptyState.style.display = 'none';
     }
 }
