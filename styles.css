@@ -116,8 +116,23 @@ header h1 {
     color: #2d6a4f;
 }
 
+.tab-btn[data-tab="add-book"] .add-icon {
+    display: inline-block;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #52b788;
+    background: rgba(82, 183, 136, 0.2);
+    border-radius: 4px;
+    padding: 0 6px;
+}
+
 .tab-btn[data-tab="add-book"].active {
     color: #52b788;
+}
+
+.tab-btn[data-tab="add-book"].active .add-icon {
+    color: #2d6a4f;
+    background: rgba(45, 106, 79, 0.2);
 }
 
 /* Tabs (deprecated - kept for backward compatibility) */
