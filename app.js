@@ -310,6 +310,25 @@ function renderBooks() {
     renderCompletedBooks();
 }
 
+// Generate gradient based on percentage
+function getProgressGradient(percentage) {
+    if (percentage <= 20) {
+        return `linear-gradient(90deg, #dc3545 0%, #dc3545 100%)`;
+    } else if (percentage <= 40) {
+        const orangePos = ((percentage - 20) / 20) * 100;
+        return `linear-gradient(90deg, #dc3545 0%, #fd7e14 ${orangePos}%)`;
+    } else if (percentage <= 60) {
+        const yellowPos = ((percentage - 40) / 20) * 100;
+        return `linear-gradient(90deg, #dc3545 0%, #fd7e14 33%, #ffc107 ${33 + yellowPos * 0.67}%)`;
+    } else if (percentage <= 80) {
+        const lightGreenPos = ((percentage - 60) / 20) * 100;
+        return `linear-gradient(90deg, #dc3545 0%, #fd7e14 25%, #ffc107 50%, #90ee90 ${50 + lightGreenPos * 0.5}%)`;
+    } else {
+        const greenPos = ((percentage - 80) / 20) * 100;
+        return `linear-gradient(90deg, #dc3545 0%, #fd7e14 20%, #ffc107 40%, #90ee90 60%, #28a745 ${60 + greenPos * 0.4}%)`;
+    }
+}
+
 // Create book card element
 function createBookCard(book) {
     const card = document.createElement('div');
@@ -364,7 +383,7 @@ function createBookCard(book) {
                 <span>${book.completed ? '100%' : remainingText}</span>
             </div>
             <div class="progress-bar-container">
-                <div class="progress-bar" style="width: ${percentage}%">
+                <div class="progress-bar" style="width: ${percentage}%; background: ${getProgressGradient(percentage)}">
                     ${percentage}%
                 </div>
             </div>
