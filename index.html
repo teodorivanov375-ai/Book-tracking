@@ -12,30 +12,12 @@
             <h1>📚 Моите книги</h1>
         </header>
 
-        <!-- Streak Display -->
-        <div class="streak-container">
-            <div class="streak-card">
-                <div class="streak-icon">🔥</div>
-                <div class="streak-info">
-                    <div class="streak-value" id="current-streak">0</div>
-                    <div class="streak-label">Текуща серия (дни)</div>
-                </div>
-            </div>
-            <div class="streak-card">
-                <div class="streak-icon">🏆</div>
-                <div class="streak-info">
-                    <div class="streak-value" id="longest-streak">0</div>
-                    <div class="streak-label">Най-дълга серия (дни)</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Tab Navigation -->
         <div class="tab-navigation">
             <button class="tab-btn" data-tab="add-book"><span class="add-icon">+</span> Добави книга</button>
             <button class="tab-btn active" data-tab="book-list"><img src="images/ic_menu.svg" alt="" class="tab-icon"> Списък с книги</button>
             <button class="tab-btn" data-tab="completed-books">✅ Завършени книги</button>
-            <button class="tab-btn" data-tab="chart">📊 График</button>
+            <button class="tab-btn" data-tab="statistics">📈 Статистики</button>
         </div>
 
         <!-- Form for adding a new book -->
@@ -127,7 +109,7 @@
 
         <!-- Completed books list -->
         <div class="tab-content books-section" id="completed-books" style="display: none;">
-            <h2>Завършени книги</h2>
+            <h2>Завършени книги <span id="completed-count" class="count-badge"></span></h2>
             
             <!-- Search bar -->
             <div class="search-container">
@@ -141,114 +123,85 @@
             </div>
         </div>
 
-        <!-- Chart tab -->
-        <div class="tab-content" id="chart" style="display: none;">
-            <h2>График на прогреса</h2>
-            <div class="chart-container">
-                <!-- Декември 2025 -->
-                <div class="month-section">
-                    <h3 class="month-title">Декември 2025</h3>
-                    <div class="days-grid">
-                        <div class="day-circle" data-date="2025-12-22"></div>
-                        <div class="day-circle" data-date="2025-12-23"></div>
-                        <div class="day-circle" data-date="2025-12-24"></div>
-                        <div class="day-circle" data-date="2025-12-25"></div>
-                        <div class="day-circle" data-date="2025-12-26"></div>
-                        <div class="day-circle" data-date="2025-12-27"></div>
-                        <div class="day-circle" data-date="2025-12-28"></div>
-                        <div class="day-circle" data-date="2025-12-29"></div>
-                        <div class="day-circle" data-date="2025-12-30"></div>
-                        <div class="day-circle" data-date="2025-12-31"></div>
+        <!-- Statistics tab -->
+        <div class="tab-content" id="statistics" style="display: none;">
+            <div class="statistics-container">
+                <h2>📈 Статистики</h2>
+                
+                <!-- Streak Cards -->
+                <div class="stats-section">
+                    <h3>Серии на четене</h3>
+                    <div class="streak-container">
+                        <div class="streak-card">
+                            <div class="streak-icon">🔥</div>
+                            <div class="streak-info">
+                                <div class="streak-value" id="current-streak-stats">0</div>
+                                <div class="streak-label">Текуща серия (дни)</div>
+                            </div>
+                        </div>
+                        <div class="streak-card">
+                            <div class="streak-icon">🏆</div>
+                            <div class="streak-info">
+                                <div class="streak-value" id="longest-streak-stats">0</div>
+                                <div class="streak-label">Най-дълга серия (дни)</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Януари 2026 -->
-                <div class="month-section">
-                    <h3 class="month-title">Януари 2026</h3>
-                    <div class="days-grid">
-                        <div class="day-circle" data-date="2026-01-01"></div>
-                        <div class="day-circle" data-date="2026-01-02"></div>
-                        <div class="day-circle" data-date="2026-01-03"></div>
-                        <div class="day-circle" data-date="2026-01-04"></div>
-                        <div class="day-circle" data-date="2026-01-05"></div>
-                        <div class="day-circle" data-date="2026-01-06"></div>
-                        <div class="day-circle" data-date="2026-01-07"></div>
-                        <div class="day-circle" data-date="2026-01-08"></div>
-                        <div class="day-circle" data-date="2026-01-09"></div>
-                        <div class="day-circle" data-date="2026-01-10"></div>
-                        <div class="day-circle" data-date="2026-01-11"></div>
-                        <div class="day-circle" data-date="2026-01-12"></div>
-                        <div class="day-circle" data-date="2026-01-13"></div>
-                        <div class="day-circle" data-date="2026-01-14"></div>
-                        <div class="day-circle" data-date="2026-01-15"></div>
-                        <div class="day-circle" data-date="2026-01-16"></div>
-                        <div class="day-circle" data-date="2026-01-17"></div>
-                        <div class="day-circle" data-date="2026-01-18"></div>
-                        <div class="day-circle" data-date="2026-01-19"></div>
-                        <div class="day-circle" data-date="2026-01-20"></div>
-                        <div class="day-circle" data-date="2026-01-21"></div>
-                        <div class="day-circle" data-date="2026-01-22"></div>
-                        <div class="day-circle" data-date="2026-01-23"></div>
-                        <div class="day-circle" data-date="2026-01-24"></div>
-                        <div class="day-circle" data-date="2026-01-25"></div>
-                        <div class="day-circle" data-date="2026-01-26"></div>
-                        <div class="day-circle" data-date="2026-01-27"></div>
-                        <div class="day-circle" data-date="2026-01-28"></div>
-                        <div class="day-circle" data-date="2026-01-29"></div>
-                        <div class="day-circle" data-date="2026-01-30"></div>
-                        <div class="day-circle" data-date="2026-01-31"></div>
+                <!-- Reading Stats -->
+                <div class="stats-section">
+                    <h3>Общо прочетено</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📖</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="total-pages">0</div>
+                                <div class="stat-label">Страници</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎧</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="total-audio-time">0ч 0м</div>
+                                <div class="stat-label">Аудио време</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="completed-books-count">0</div>
+                                <div class="stat-label">Завършени книги</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📚</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="total-books-count">0</div>
+                                <div class="stat-label">Общо книги</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Февруари 2026 -->
-                <div class="month-section">
-                    <h3 class="month-title">Февруари 2026</h3>
-                    <div class="days-grid">
-                        <div class="day-circle" data-date="2026-02-01"></div>
-                        <div class="day-circle" data-date="2026-02-02"></div>
-                        <div class="day-circle" data-date="2026-02-03"></div>
-                        <div class="day-circle" data-date="2026-02-04"></div>
-                        <div class="day-circle" data-date="2026-02-05"></div>
-                        <div class="day-circle" data-date="2026-02-06"></div>
-                        <div class="day-circle" data-date="2026-02-07"></div>
-                        <div class="day-circle" data-date="2026-02-08"></div>
-                        <div class="day-circle" data-date="2026-02-09"></div>
-                        <div class="day-circle" data-date="2026-02-10"></div>
-                        <div class="day-circle" data-date="2026-02-11"></div>
-                        <div class="day-circle" data-date="2026-02-12"></div>
-                        <div class="day-circle" data-date="2026-02-13"></div>
-                        <div class="day-circle" data-date="2026-02-14"></div>
-                        <div class="day-circle" data-date="2026-02-15"></div>
-                        <div class="day-circle" data-date="2026-02-16"></div>
-                        <div class="day-circle" data-date="2026-02-17"></div>
-                        <div class="day-circle" data-date="2026-02-18"></div>
-                        <div class="day-circle" data-date="2026-02-19"></div>
-                        <div class="day-circle" data-date="2026-02-20"></div>
-                        <div class="day-circle" data-date="2026-02-21"></div>
-                        <div class="day-circle" data-date="2026-02-22"></div>
-                        <div class="day-circle" data-date="2026-02-23"></div>
-                        <div class="day-circle" data-date="2026-02-24"></div>
-                        <div class="day-circle" data-date="2026-02-25"></div>
-                        <div class="day-circle" data-date="2026-02-26"></div>
-                        <div class="day-circle" data-date="2026-02-27"></div>
-                        <div class="day-circle" data-date="2026-02-28"></div>
-                    </div>
-                </div>
-
-                <!-- Март 2026 -->
-                <div class="month-section">
-                    <h3 class="month-title">Март 2026</h3>
-                    <div class="days-grid">
-                        <div class="day-circle" data-date="2026-03-01"></div>
-                        <div class="day-circle" data-date="2026-03-02"></div>
-                        <div class="day-circle" data-date="2026-03-03"></div>
-                        <div class="day-circle" data-date="2026-03-04"></div>
-                        <div class="day-circle" data-date="2026-03-05"></div>
-                        <div class="day-circle" data-date="2026-03-06"></div>
-                        <div class="day-circle" data-date="2026-03-07"></div>
-                        <div class="day-circle" data-date="2026-03-08"></div>
-                        <div class="day-circle" data-date="2026-03-09"></div>
-                        <div class="day-circle" data-date="2026-03-10"></div>
+                <!-- Time Period Stats -->
+                <div class="stats-section">
+                    <h3>Период на четене</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="reading-days">0</div>
+                                <div class="stat-label">Дни с четене</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="avg-pages-per-day">0</div>
+                                <div class="stat-label">Средно страници/ден</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

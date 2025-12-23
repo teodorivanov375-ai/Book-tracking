@@ -163,6 +163,11 @@ function switchTab(tabName) {
         activeTab.classList.add('active');
         activeTab.style.display = 'block';
     }
+    
+    // Update statistics when switching to statistics tab
+    if (tabName === 'statistics') {
+        renderStatistics();
+    }
 }
 
 // Handle add book
@@ -371,9 +376,11 @@ function renderBooks() {
         emptyState.style.display = 'none';
         booksList.innerHTML = '';
 
-        // Group books by category
-        const mamaBooks = books.filter(book => book.category === 'mama');
-        const yavorBooks = books.filter(book => book.category === 'yavor');
+        // Group books by category and sort alphabetically
+        const mamaBooks = books.filter(book => book.category === 'mama')
+            .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+        const yavorBooks = books.filter(book => book.category === 'yavor')
+            .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
 
         // Render Mama category
         if (mamaBooks.length > 0) {
@@ -578,14 +585,15 @@ function loadStreaks() {
 
 // Render streak display
 function renderStreakDisplay() {
-    const currentStreakEl = document.getElementById('current-streak');
-    const longestStreakEl = document.getElementById('longest-streak');
+    // Update in statistics tab
+    const currentStreakStatsEl = document.getElementById('current-streak-stats');
+    const longestStreakStatsEl = document.getElementById('longest-streak-stats');
     
-    if (currentStreakEl) {
-        currentStreakEl.textContent = currentStreak;
+    if (currentStreakStatsEl) {
+        currentStreakStatsEl.textContent = currentStreak;
     }
-    if (longestStreakEl) {
-        longestStreakEl.textContent = longestStreak;
+    if (longestStreakStatsEl) {
+        longestStreakStatsEl.textContent = longestStreak;
     }
 }
 
@@ -644,8 +652,15 @@ function handleSearch(e) {
 function renderCompletedBooks() {
     const completedBooksList = document.getElementById('completed-books-list');
     const completedEmptyState = document.getElementById('completed-empty-state');
+    const completedCountBadge = document.getElementById('completed-count');
     
-    const completedBooks = books.filter(book => book.completed);
+    const completedBooks = books.filter(book => book.completed)
+        .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+    
+    // Update count badge
+    if (completedCountBadge) {
+        completedCountBadge.textContent = completedBooks.length > 0 ? `(${completedBooks.length})` : '';
+    }
     
     if (completedBooks.length === 0) {
         completedBooksList.innerHTML = '';
@@ -732,4 +747,60 @@ function filterBooksByCategory(category) {
     }
 }
 
-
+// Render statistics
+function renderStatistics() {
+    // Update streak display in statistics tab
+    renderStreakDisplay();
+    
+    // Calculate total pages read from completed paper books
+    let totalPages = 0;
+    books.forEach(book => {
+        if (book.type === 'paper' && book.completed) {
+            totalPages += book.getTotalProgress();
+        }
+    });
+    
+    // Calculate total audio time from completed audio books
+    let totalAudioMinutes = 0;
+    books.forEach(book => {
+        if (book.type === 'audio' && book.completed) {
+            totalAudioMinutes += book.getTotalProgress();
+        }
+    });
+    
+    const audioHours = Math.floor(totalAudioMinutes / 60);
+    const audioMinutes = totalAudioMinutes % 60;
+    
+    // Count completed books
+    const completedBooksCount = books.filter(book => book.completed).length;
+    
+    // Total books
+    const totalBooksCount = books.length;
+    
+    // Calculate unique reading days
+    const allDates = new Set();
+    books.forEach(book => {
+        book.logs.forEach(log => {
+            allDates.add(log.date);
+        });
+    });
+    const readingDays = allDates.size;
+    
+    // Calculate average pages per day
+    const avgPagesPerDay = readingDays > 0 ? Math.round(totalPages / readingDays) : 0;
+    
+    // Update DOM
+    const totalPagesEl = document.getElementById('total-pages');
+    const totalAudioTimeEl = document.getElementById('total-audio-time');
+    const completedBooksCountEl = document.getElementById('completed-books-count');
+    const totalBooksCountEl = document.getElementById('total-books-count');
+    const readingDaysEl = document.getElementById('reading-days');
+    const avgPagesPerDayEl = document.getElementById('avg-pages-per-day');
+    
+    if (totalPagesEl) totalPagesEl.textContent = totalPages.toLocaleString('bg');
+    if (totalAudioTimeEl) totalAudioTimeEl.textContent = `${audioHours}ч ${audioMinutes}м`;
+    if (completedBooksCountEl) completedBooksCountEl.textContent = completedBooksCount;
+    if (totalBooksCountEl) totalBooksCountEl.textContent = totalBooksCount;
+    if (readingDaysEl) readingDaysEl.textContent = readingDays;
+    if (avgPagesPerDayEl) avgPagesPerDayEl.textContent = avgPagesPerDay;
+}
