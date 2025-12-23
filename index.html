@@ -10,6 +10,7 @@
     <div class="container">
         <header>
             <h1>📚 Моите книги</h1>
+            <button id="theme-toggle" class="theme-toggle" title="Смени темата">🌙</button>
         </header>
 
         <!-- Tab Navigation -->
@@ -17,7 +18,9 @@
             <button class="tab-btn" data-tab="add-book"><span class="add-icon">+</span> Добави книга</button>
             <button class="tab-btn active" data-tab="book-list"><img src="images/ic_menu.svg" alt="" class="tab-icon"> Списък с книги</button>
             <button class="tab-btn" data-tab="completed-books">✅ Завършени книги</button>
-            <button class="tab-btn" data-tab="statistics">📈 Статистики</button>
+            <button class="tab-btn" data-tab="statistics">📊 Статистики</button>
+            <button class="tab-btn" data-tab="activity">🔔 Активност</button>
+            <button class="tab-btn" data-tab="achievements">🏆 Постижения</button>
         </div>
 
         <!-- Form for adding a new book -->
@@ -126,83 +129,53 @@
         <!-- Statistics tab -->
         <div class="tab-content" id="statistics" style="display: none;">
             <div class="statistics-container">
-                <h2>📈 Статистики</h2>
+                <h2>� Статистики</h2>
                 
-                <!-- Streak Cards -->
-                <div class="stats-section">
-                    <h3>Серии на четене</h3>
-                    <div class="streak-container">
-                        <div class="streak-card">
-                            <div class="streak-icon">🔥</div>
-                            <div class="streak-info">
-                                <div class="streak-value" id="current-streak-stats">0</div>
-                                <div class="streak-label">Текуща серия (дни)</div>
-                            </div>
-                        </div>
-                        <div class="streak-card">
-                            <div class="streak-icon">🏆</div>
-                            <div class="streak-info">
-                                <div class="streak-value" id="longest-streak-stats">0</div>
-                                <div class="streak-label">Най-дълга серия (дни)</div>
-                            </div>
-                        </div>
+                <div class="stats-overview">
+                    <div class="stat-box">
+                        <div class="stat-number" id="stat-total-books">0</div>
+                        <div class="stat-label">Общо книги</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="stat-completed-books">0</div>
+                        <div class="stat-label">Завършени</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="stat-total-pages">2031</div>
+                        <div class="stat-label">Страници</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-number" id="stat-total-audio">33ч</div>
+                        <div class="stat-label">Аудио време</div>
                     </div>
                 </div>
 
-                <!-- Reading Stats -->
-                <div class="stats-section">
-                    <h3>Общо прочетено</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">📖</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="total-pages">0</div>
-                                <div class="stat-label">Страници</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">🎧</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="total-audio-time">0ч 0м</div>
-                                <div class="stat-label">Аудио време</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">✅</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="completed-books-count">0</div>
-                                <div class="stat-label">Завършени книги</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">📚</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="total-books-count">0</div>
-                                <div class="stat-label">Общо книги</div>
-                            </div>
-                        </div>
+                <div class="streak-display">
+                    <div class="streak-item">
+                        <span class="streak-emoji">🔥</span>
+                        <span class="streak-value" id="stat-current-streak">0</span>
+                        <span class="streak-text">дни серия</span>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- Time Period Stats -->
-                <div class="stats-section">
-                    <h3>Период на четене</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">📅</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="reading-days">0</div>
-                                <div class="stat-label">Дни с четене</div>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">⏱️</div>
-                            <div class="stat-info">
-                                <div class="stat-value" id="avg-pages-per-day">0</div>
-                                <div class="stat-label">Средно страници/ден</div>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Activity Feed tab -->
+        <div class="tab-content" id="activity" style="display: none;">
+            <div class="activity-container">
+                <h2>🔔 Последна активност</h2>
+                <div id="activity-list" class="activity-list">
+                    <div class="empty-state">Все още няма активност</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements tab -->
+        <div class="tab-content" id="achievements" style="display: none;">
+            <div class="achievements-container">
+                <h2>🏆 Постижения</h2>
+                <div id="achievements-grid" class="achievements-grid">
+                    <!-- Achievements will be rendered here -->
                 </div>
             </div>
         </div>

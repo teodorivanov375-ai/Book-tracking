@@ -1,3 +1,7 @@
+// ========================
+// DATA MODEL
+// ========================
+
 // Book class to represent each book
 class Book {
     constructor(id, name, author, type, total, category) {
@@ -8,7 +12,8 @@ class Book {
         this.total = total; // total pages or total minutes
         this.category = category; // 'mama' or 'yavor'
         this.logs = []; // array of {date, amount}
-        this.completed = false;
+        this.status = 'planned'; // 'planned', 'in-progress', 'completed'
+        this.completed = false; // legacy support
     }
 
     getTotalProgress() {
@@ -24,14 +29,36 @@ class Book {
     getRemainingAmount() {
         return Math.max(this.total - this.getTotalProgress(), 0);
     }
+
+    updateStatus() {
+        const progress = this.getTotalProgress();
+        if (progress === 0) {
+            this.status = 'planned';
+        } else if (progress >= this.total) {
+            this.status = 'completed';
+            this.completed = true;
+        } else {
+            this.status = 'in-progress';
+        }
+    }
 }
 
-// Application state
+// ========================
+// APPLICATION STATE
+// ========================
+
 let books = [];
 let currentStreak = 0;
 let longestStreak = 0;
+let activityFeed = []; // {type, message, date, bookName}
+let achievements = [];
+let dailyGoal = 50; // pages per day
+let theme = 'light';
 
-// DOM elements
+// ========================
+// DOM ELEMENTS
+// ========================
+
 const addBookForm = document.getElementById('add-book-form');
 const booksList = document.getElementById('books-list');
 const emptyState = document.getElementById('empty-state');
@@ -43,18 +70,37 @@ const logForm = document.getElementById('log-form');
 const logPaperField = document.getElementById('log-paper-field');
 const logAudioField = document.getElementById('log-audio-field');
 
-// Initialize app
+// ========================
+// INITIALIZATION
+// ========================
+
 document.addEventListener('DOMContentLoaded', () => {
+    loadTheme();
     loadBooks();
     loadStreaks();
+    loadActivityFeed();
+    loadAchievements();
     updateStreaks();
     renderBooks();
     renderStreakDisplay();
+    renderStatistics();
+    renderActivityFeed();
+    renderAchievements();
     setupEventListeners();
+    initializeAchievements();
 });
 
-// Setup event listeners
+// ========================
+// EVENT LISTENERS
+// ========================
+
 function setupEventListeners() {
+    // Theme toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -200,6 +246,11 @@ function handleAddBook(e) {
     renderBooks();
     addBookForm.reset();
     
+    // Add activity and check achievements
+    addActivity('Добавяне', `Добавена книга "${name}"`, name);
+    checkAchievements();
+    renderStatistics();
+    
     // Switch to book list tab after adding
     switchTab('book-list');
 }
@@ -230,6 +281,7 @@ function handleAddLog(e) {
 
     book.logs.push({ date, amount });
     book.logs.sort((a, b) => new Date(b.date) - new Date(a.date));
+    book.updateStatus();
 
     saveBooks();
     updateStreaks();
@@ -237,6 +289,12 @@ function handleAddLog(e) {
     renderBooks();
     renderStreakDisplay();
     renderStatistics();
+    
+    // Add activity
+    const unit = book.type === 'paper' ? 'страници' : 'минути';
+    addActivity('Прогрес', `${amount} ${unit} за "${book.name}"`, book.name);
+    checkAchievements();
+    
     logModal.style.display = 'none';
     logForm.reset();
 }
@@ -348,22 +406,29 @@ function toggleBookCompletion(bookId) {
             book.logs.push({ date: today, amount: remaining });
             book.logs.sort((a, b) => new Date(b.date) - new Date(a.date));
         }
+        addActivity('Завършване', `Завършена книга "${book.name}"`, book.name);
     }
 
     book.completed = !book.completed;
+    book.updateStatus();
     saveBooks();
     updateStreaks();
     saveStreaks();
     renderBooks();
     renderStreakDisplay();
+    renderStatistics();
+    checkAchievements();
 }
 
 // Delete book
 function deleteBook(bookId) {
+    const book = books.find(b => b.id === bookId);
     if (confirm('Сигурни ли сте, че искате да изтриете тази книга?')) {
+        addActivity('Изтриване', `Изтрита книга "${book.name}"`, book.name);
         books = books.filter(b => b.id !== bookId);
         saveBooks();
         renderBooks();
+        renderStatistics();
     }
 }
 
@@ -612,6 +677,8 @@ function loadBooks() {
             const book = new Book(data.id, data.name, data.author, data.type, data.total, data.category || 'mama');
             book.logs = data.logs || [];
             book.completed = data.completed || false;
+            book.status = data.status || (book.completed ? 'completed' : 'planned');
+            book.updateStatus();
             return book;
         });
     }
@@ -751,43 +818,180 @@ function filterBooksByCategory(category) {
 // Render statistics
 function renderStatistics() {
     // Update streak display in statistics tab
-    renderStreakDisplay();
+    const statCurrentStreak = document.getElementById('stat-current-streak');
+    if (statCurrentStreak) statCurrentStreak.textContent = currentStreak;
     
-    // Fixed values
-    const totalPages = 2031;
-    const audioHours = 33;
-    const audioMinutes = 0;
+    // Update statistics
+    const statTotalBooks = document.getElementById('stat-total-books');
+    const statCompletedBooks = document.getElementById('stat-completed-books');
+    const statTotalPages = document.getElementById('stat-total-pages');
+    const statTotalAudio = document.getElementById('stat-total-audio');
     
-    // Count completed books
-    const completedBooksCount = books.filter(book => book.completed).length;
-    
-    // Total books
-    const totalBooksCount = books.length;
-    
-    // Calculate unique reading days
-    const allDates = new Set();
-    books.forEach(book => {
-        book.logs.forEach(log => {
-            allDates.add(log.date);
-        });
-    });
-    const readingDays = allDates.size;
-    
-    // Calculate average pages per day
-    const avgPagesPerDay = readingDays > 0 ? Math.round(totalPages / readingDays) : 0;
-    
-    // Update DOM
-    const totalPagesEl = document.getElementById('total-pages');
-    const totalAudioTimeEl = document.getElementById('total-audio-time');
-    const completedBooksCountEl = document.getElementById('completed-books-count');
-    const totalBooksCountEl = document.getElementById('total-books-count');
-    const readingDaysEl = document.getElementById('reading-days');
-    const avgPagesPerDayEl = document.getElementById('avg-pages-per-day');
-    
-    if (totalPagesEl) totalPagesEl.textContent = totalPages.toLocaleString('bg');
-    if (totalAudioTimeEl) totalAudioTimeEl.textContent = `${audioHours}ч ${audioMinutes}м`;
-    if (completedBooksCountEl) completedBooksCountEl.textContent = completedBooksCount;
-    if (totalBooksCountEl) totalBooksCountEl.textContent = totalBooksCount;
-    if (readingDaysEl) readingDaysEl.textContent = readingDays;
-    if (avgPagesPerDayEl) avgPagesPerDayEl.textContent = avgPagesPerDay;
+    if (statTotalBooks) statTotalBooks.textContent = books.length;
+    if (statCompletedBooks) statCompletedBooks.textContent = books.filter(b => b.completed).length;
+    if (statTotalPages) statTotalPages.textContent = '2031';
+    if (statTotalAudio) statTotalAudio.textContent = '33ч';
 }
+
+// ========================
+// THEME MANAGEMENT
+// ========================
+
+function toggleTheme() {
+    theme = theme === 'light' ? 'dark' : 'light';
+    document.body.classList.toggle('dark-mode');
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
+    }
+    localStorage.setItem('theme', theme);
+}
+
+function loadTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+        theme = saved;
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) themeToggle.textContent = '☀️';
+        }
+    }
+}
+
+// ========================
+// ACTIVITY FEED
+// ========================
+
+function addActivity(type, message, bookName = '') {
+    const activity = {
+        type,
+        message,
+        bookName,
+        date: new Date().toISOString()
+    };
+    activityFeed.unshift(activity);
+    if (activityFeed.length > 50) activityFeed.pop(); // Keep last 50
+    saveActivityFeed();
+    renderActivityFeed();
+}
+
+function renderActivityFeed() {
+    const list = document.getElementById('activity-list');
+    if (!list) return;
+    
+    if (activityFeed.length === 0) {
+        list.innerHTML = '<div class="empty-state">Все още няма активност</div>';
+        return;
+    }
+    
+    list.innerHTML = activityFeed.map(activity => `
+        <div class="activity-item">
+            <div class="activity-type">${getActivityIcon(activity.type)} ${activity.type}</div>
+            <div class="activity-message">${activity.message}</div>
+            <div class="activity-date">${formatDate(activity.date)}</div>
+        </div>
+    `).join('');
+}
+
+function getActivityIcon(type) {
+    const icons = {
+        'Добавяне': '📚',
+        'Прогрес': '📖',
+        'Завършване': '✅',
+        'Изтриване': '🗑️'
+    };
+    return icons[type] || '📝';
+}
+
+function formatDate(isoDate) {
+    const date = new Date(isoDate);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (minutes < 1) return 'Току-що';
+    if (minutes < 60) return `Преди ${minutes} мин`;
+    if (hours < 24) return `Преди ${hours} ч`;
+    if (days < 7) return `Преди ${days} дни`;
+    return date.toLocaleDateString('bg-BG');
+}
+
+function saveActivityFeed() {
+    localStorage.setItem('activityFeed', JSON.stringify(activityFeed));
+}
+
+function loadActivityFeed() {
+    const saved = localStorage.getItem('activityFeed');
+    if (saved) {
+        activityFeed = JSON.parse(saved);
+    }
+}
+
+// ========================
+// ACHIEVEMENTS
+// ========================
+
+const achievementsList = [
+    { id: 'first-book', icon: '📚', name: 'Първа книга', desc: 'Добави първата си книга', check: () => books.length >= 1 },
+    { id: 'five-books', icon: '📖', name: '5 книги', desc: 'Добави 5 книги', check: () => books.length >= 5 },
+    { id: 'first-complete', icon: '✅', name: 'Първо завършване', desc: 'Завърши първата си книга', check: () => books.some(b => b.completed) },
+    { id: 'five-complete', icon: '🏆', name: '5 завършени', desc: 'Завърши 5 книги', check: () => books.filter(b => b.completed).length >= 5 },
+    { id: 'streak-7', icon: '🔥', name: '7 дни серия', desc: 'Поддържай 7 дневна серия', check: () => currentStreak >= 7 },
+    { id: 'streak-30', icon: '⭐', name: '30 дни серия', desc: 'Поддържай 30 дневна серия', check: () => currentStreak >= 30 },
+];
+
+function initializeAchievements() {
+    const saved = localStorage.getItem('achievements');
+    if (saved) {
+        achievements = JSON.parse(saved);
+    } else {
+        achievements = achievementsList.map(a => ({ id: a.id, unlocked: false }));
+    }
+    checkAchievements();
+}
+
+function checkAchievements() {
+    let updated = false;
+    achievementsList.forEach(achievement => {
+        const userAch = achievements.find(a => a.id === achievement.id);
+        if (userAch && !userAch.unlocked && achievement.check()) {
+            userAch.unlocked = true;
+            updated = true;
+            addActivity('Постижение', `Отключено: ${achievement.name}`, '');
+        }
+    });
+    if (updated) {
+        saveAchievements();
+        renderAchievements();
+    }
+}
+
+function renderAchievements() {
+    const grid = document.getElementById('achievements-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = achievementsList.map(achievement => {
+        const userAch = achievements.find(a => a.id === achievement.id);
+        const unlocked = userAch ? userAch.unlocked : false;
+        return `
+            <div class="achievement-card ${unlocked ? '' : 'locked'}">
+                <div class="achievement-icon">${achievement.icon}</div>
+                <div class="achievement-name">${achievement.name}</div>
+                <div class="achievement-desc">${achievement.desc}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function saveAchievements() {
+    localStorage.setItem('achievements', JSON.stringify(achievements));
+}
+
+function loadAchievements() {
+    const saved = localStorage.getItem('achievements');
+    if (saved) {
+        achievements = JSON.parse(saved);
+    }}
