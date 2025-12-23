@@ -442,36 +442,84 @@ function renderBooks() {
         emptyState.style.display = 'none';
         booksList.innerHTML = '';
 
-        // Group books by type and sort alphabetically
-        const paperBooks = books.filter(book => book.type === 'paper')
-            .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
-        const audioBooks = books.filter(book => book.type === 'audio')
-            .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+        // Group books by category
+        const mamaBooks = books.filter(book => book.category === 'mama');
+        const yavorBooks = books.filter(book => book.category === 'yavor');
 
-        // Render Paper books
-        if (paperBooks.length > 0) {
-            const paperSection = document.createElement('div');
-            paperSection.className = 'category-section';
-            paperSection.innerHTML = '<h3 class="category-title">📖 Хартиени книги</h3>';
-            booksList.appendChild(paperSection);
+        // Render Mama category
+        if (mamaBooks.length > 0) {
+            const mamaCategorySection = document.createElement('div');
+            mamaCategorySection.className = 'category-section';
+            mamaCategorySection.innerHTML = '<h3 class="category-title">📚 Уговорка с Мама</h3>';
+            booksList.appendChild(mamaCategorySection);
 
-            paperBooks.forEach(book => {
-                const bookCard = createBookCard(book);
-                booksList.appendChild(bookCard);
-            });
+            // Paper books in Mama category
+            const mamaPaperBooks = mamaBooks.filter(book => book.type === 'paper')
+                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+            if (mamaPaperBooks.length > 0) {
+                const paperSection = document.createElement('div');
+                paperSection.className = 'type-section';
+                paperSection.innerHTML = '<h4 class="type-title">📖 Хартиени книги</h4>';
+                booksList.appendChild(paperSection);
+
+                mamaPaperBooks.forEach(book => {
+                    const bookCard = createBookCard(book);
+                    booksList.appendChild(bookCard);
+                });
+            }
+
+            // Audio books in Mama category
+            const mamaAudioBooks = mamaBooks.filter(book => book.type === 'audio')
+                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+            if (mamaAudioBooks.length > 0) {
+                const audioSection = document.createElement('div');
+                audioSection.className = 'type-section';
+                audioSection.innerHTML = '<h4 class="type-title">🎧 Аудио книги</h4>';
+                booksList.appendChild(audioSection);
+
+                mamaAudioBooks.forEach(book => {
+                    const bookCard = createBookCard(book);
+                    booksList.appendChild(bookCard);
+                });
+            }
         }
 
-        // Render Audio books
-        if (audioBooks.length > 0) {
-            const audioSection = document.createElement('div');
-            audioSection.className = 'category-section';
-            audioSection.innerHTML = '<h3 class="category-title">🎧 Аудио книги</h3>';
-            booksList.appendChild(audioSection);
+        // Render Yavor category
+        if (yavorBooks.length > 0) {
+            const yavorCategorySection = document.createElement('div');
+            yavorCategorySection.className = 'category-section';
+            yavorCategorySection.innerHTML = '<h3 class="category-title">📚 Уговорка с Явор</h3>';
+            booksList.appendChild(yavorCategorySection);
 
-            audioBooks.forEach(book => {
-                const bookCard = createBookCard(book);
-                booksList.appendChild(bookCard);
-            });
+            // Paper books in Yavor category
+            const yavorPaperBooks = yavorBooks.filter(book => book.type === 'paper')
+                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+            if (yavorPaperBooks.length > 0) {
+                const paperSection = document.createElement('div');
+                paperSection.className = 'type-section';
+                paperSection.innerHTML = '<h4 class="type-title">📖 Хартиени книги</h4>';
+                booksList.appendChild(paperSection);
+
+                yavorPaperBooks.forEach(book => {
+                    const bookCard = createBookCard(book);
+                    booksList.appendChild(bookCard);
+                });
+            }
+
+            // Audio books in Yavor category
+            const yavorAudioBooks = yavorBooks.filter(book => book.type === 'audio')
+                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+            if (yavorAudioBooks.length > 0) {
+                const audioSection = document.createElement('div');
+                audioSection.className = 'type-section';
+                audioSection.innerHTML = '<h4 class="type-title">🎧 Аудио книги</h4>';
+                booksList.appendChild(audioSection);
+
+                yavorAudioBooks.forEach(book => {
+                    const bookCard = createBookCard(book);
+                    booksList.appendChild(bookCard);
+                });
+            }
         }
     }
 
@@ -782,15 +830,18 @@ function handleSearchCompleted(e) {
 // Filter books by category
 function filterBooksByCategory(category) {
     const categorySections = document.querySelectorAll('.category-section');
+    const typeSections = document.querySelectorAll('.type-section');
     const bookCards = document.querySelectorAll('#books-list .book-card');
     
     if (category === 'all') {
         // Show all
         categorySections.forEach(section => section.style.display = 'block');
+        typeSections.forEach(section => section.style.display = 'block');
         bookCards.forEach(card => card.style.display = 'block');
     } else {
         // Hide all first
         categorySections.forEach(section => section.style.display = 'none');
+        typeSections.forEach(section => section.style.display = 'none');
         bookCards.forEach(card => card.style.display = 'none');
         
         // Show only selected category
@@ -808,6 +859,8 @@ function filterBooksByCategory(category) {
                     element.style.display = 'none';
                     shouldShowBooks = false;
                 }
+            } else if (element.classList.contains('type-section') && shouldShowBooks) {
+                element.style.display = 'block';
             } else if (element.classList.contains('book-card') && shouldShowBooks) {
                 element.style.display = 'block';
             }
