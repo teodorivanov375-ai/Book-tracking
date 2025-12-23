@@ -711,20 +711,22 @@ function filterBooksByCategory(category) {
         bookCards.forEach(card => card.style.display = 'none');
         
         // Show only selected category
-        categorySections.forEach((section, index) => {
-            const title = section.querySelector('.category-title').textContent;
-            if ((category === 'mama' && title.includes('Мама')) || 
-                (category === 'yavor' && title.includes('Явор'))) {
-                section.style.display = 'block';
-                
-                // Show books after this section until next section
-                let nextElement = section.nextElementSibling;
-                while (nextElement && !nextElement.classList.contains('category-section')) {
-                    if (nextElement.classList.contains('book-card')) {
-                        nextElement.style.display = 'block';
-                    }
-                    nextElement = nextElement.nextElementSibling;
+        let shouldShowBooks = false;
+        const allElements = document.querySelectorAll('#books-list > *');
+        
+        allElements.forEach(element => {
+            if (element.classList.contains('category-section')) {
+                const title = element.querySelector('.category-title').textContent;
+                if ((category === 'mama' && title.includes('Мама')) || 
+                    (category === 'yavor' && title.includes('Явор'))) {
+                    element.style.display = 'block';
+                    shouldShowBooks = true;
+                } else {
+                    element.style.display = 'none';
+                    shouldShowBooks = false;
                 }
+            } else if (element.classList.contains('book-card') && shouldShowBooks) {
+                element.style.display = 'block';
             }
         });
     }
