@@ -711,9 +711,7 @@ header h1 {
     color: white;
 }
 
-.day-circle span {
-    font-size: 14px;
-}
+
 
 /* Responsive */
 @media (max-width: 600px) {
