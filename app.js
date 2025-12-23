@@ -4,13 +4,14 @@
 
 // Book class to represent each book
 class Book {
-    constructor(id, name, author, type, total, category) {
+    constructor(id, name, author, type, total, category, coverUrl = '') {
         this.id = id;
         this.name = name;
         this.author = author;
         this.type = type; // 'paper' or 'audio'
         this.total = total; // total pages or total minutes
         this.category = category; // 'mama' or 'yavor'
+        this.coverUrl = coverUrl; // book cover image URL
         this.logs = []; // array of {date, amount}
         this.status = 'planned'; // 'planned', 'in-progress', 'completed'
         this.completed = false; // legacy support
@@ -181,6 +182,41 @@ function setupEventListeners() {
         document.getElementById('category-modal').style.display = 'none';
     });
 
+    // Edit modal
+    if (editBookForm) {
+        editBookForm.addEventListener('submit', handleEditBook);
+    }
+    
+    document.getElementById('cancel-edit').addEventListener('click', () => {
+        editModal.style.display = 'none';
+    });
+    
+    // Toggle between paper and audio fields in edit modal
+    document.querySelectorAll('input[name="edit-book-type"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'paper') {
+                editPaperFields.style.display = 'block';
+                editAudioFields.style.display = 'none';
+            } else {
+                editPaperFields.style.display = 'none';
+                editAudioFields.style.display = 'block';
+            }
+        });
+    });
+    
+    // Cover preview for add and edit forms
+    document.getElementById('book-cover').addEventListener('input', (e) => {
+        showCoverPreview('cover-preview', e.target.value);
+    });
+    
+    document.getElementById('edit-book-cover').addEventListener('input', (e) => {
+        showCoverPreview('edit-cover-preview', e.target.value);
+    });
+    
+    // Export/Import buttons
+    document.getElementById('export-data-btn').addEventListener('click', exportData);
+    document.getElementById('import-data-file').addEventListener('change', importData);
+
     // Close modal when clicking outside
     window.addEventListener('click', (e) => {
         if (e.target === logModal) {
@@ -188,6 +224,9 @@ function setupEventListeners() {
         }
         if (e.target === logsModal) {
             logsModal.style.display = 'none';
+        }
+        if (e.target === editModal) {
+            editModal.style.display = 'none';
         }
         const categoryModal = document.getElementById('category-modal');
         if (e.target === categoryModal) {
@@ -213,6 +252,7 @@ function switchTab(tabName) {
     // Update statistics when switching to statistics tab
     if (tabName === 'statistics') {
         renderStatistics();
+        renderCharts();
     }
 }
 
@@ -224,6 +264,7 @@ function handleAddBook(e) {
     const author = document.getElementById('book-author').value.trim();
     const type = document.querySelector('input[name="book-type"]:checked').value;
     const category = document.querySelector('input[name="book-category"]:checked').value;
+    const coverUrl = document.getElementById('book-cover').value.trim();
 
     let total;
     if (type === 'paper') {
@@ -240,16 +281,20 @@ function handleAddBook(e) {
     }
 
     const id = Date.now().toString();
-    const book = new Book(id, name, author, type, total, category);
+    const book = new Book(id, name, author, type, total, category, coverUrl);
     books.push(book);
     saveBooks();
     renderBooks();
     addBookForm.reset();
     
+    // Reset cover preview
+    showCoverPreview('cover-preview', '');
+    
     // Add activity and check achievements
     addActivity('Добавяне', `Добавена книга "${name}"`, name);
     checkAchievements();
     renderStatistics();
+    renderCharts();
     
     // Switch to book list tab after adding
     switchTab('book-list');
@@ -577,14 +622,18 @@ function createBookCard(book) {
     card.innerHTML = `
         <div class="book-header">
             <div class="book-info">
-                <h3>${book.name}</h3>
-                <div class="author">от ${book.author}</div>
-                <span class="type-badge ${book.type}">
-                    ${book.type === 'paper' ? '📖 Хартиена' : '🎧 Аудио'} • ${totalText}
-                </span>
+                ${book.coverUrl ? `<div class="book-cover-small"><img src="${book.coverUrl}" alt="${book.name}" onerror="this.style.display='none'"></div>` : ''}
+                <div>
+                    <h3>${book.name}</h3>
+                    <div class="author">от ${book.author}</div>
+                    <span class="type-badge ${book.type}">
+                        ${book.type === 'paper' ? '📖 Хартиена' : '🎧 Аудио'} • ${totalText}
+                    </span>
+                </div>
             </div>
             <div class="book-actions">
                 <button class="btn btn-success" onclick="openLogModal('${book.id}')">+ Прогрес</button>
+                <button class="btn btn-info" onclick="openEditModal('${book.id}')" title="Редактирай">✏️</button>
                 <button class="btn btn-category" onclick="openCategoryModal('${book.id}')" title="Промени категория">📁</button>
                 <button class="btn btn-complete" onclick="toggleBookCompletion('${book.id}')">
                     ${book.completed ? '↩️ Незавършена' : '✓ Завършена'}
@@ -722,7 +771,7 @@ function loadBooks() {
     if (saved) {
         const parsed = JSON.parse(saved);
         books = parsed.map(data => {
-            const book = new Book(data.id, data.name, data.author, data.type, data.total, data.category || 'mama');
+            const book = new Book(data.id, data.name, data.author, data.type, data.total, data.category || 'mama', data.coverUrl || '');
             book.logs = data.logs || [];
             book.completed = data.completed || false;
             book.status = data.status || (book.completed ? 'completed' : 'planned');
@@ -1047,4 +1096,333 @@ function loadAchievements() {
     const saved = localStorage.getItem('achievements');
     if (saved) {
         achievements = JSON.parse(saved);
-    }}
+    }
+}
+
+// ========================
+// EDIT BOOK FUNCTIONALITY
+// ========================
+
+const editModal = document.getElementById('edit-modal');
+const editBookForm = document.getElementById('edit-book-form');
+const editPaperFields = document.getElementById('edit-paper-fields');
+const editAudioFields = document.getElementById('edit-audio-fields');
+
+function openEditModal(bookId) {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    document.getElementById('edit-book-id').value = bookId;
+    document.getElementById('edit-book-name').value = book.name;
+    document.getElementById('edit-book-author').value = book.author;
+    document.getElementById('edit-book-cover').value = book.coverUrl || '';
+    
+    // Set category
+    const categoryRadios = document.querySelectorAll('input[name="edit-book-category"]');
+    categoryRadios.forEach(radio => {
+        radio.checked = radio.value === book.category;
+    });
+    
+    // Set type
+    const typeRadios = document.querySelectorAll('input[name="edit-book-type"]');
+    typeRadios.forEach(radio => {
+        radio.checked = radio.value === book.type;
+    });
+    
+    // Set fields based on type
+    if (book.type === 'paper') {
+        editPaperFields.style.display = 'block';
+        editAudioFields.style.display = 'none';
+        document.getElementById('edit-total-pages').value = book.total;
+    } else {
+        editPaperFields.style.display = 'none';
+        editAudioFields.style.display = 'block';
+        const hours = Math.floor(book.total / 60);
+        const minutes = book.total % 60;
+        document.getElementById('edit-total-hours').value = hours;
+        document.getElementById('edit-total-minutes').value = minutes;
+    }
+    
+    // Show cover preview
+    showCoverPreview('edit-cover-preview', book.coverUrl);
+    
+    editModal.style.display = 'block';
+}
+
+function handleEditBook(e) {
+    e.preventDefault();
+    
+    const bookId = document.getElementById('edit-book-id').value;
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+    
+    book.name = document.getElementById('edit-book-name').value.trim();
+    book.author = document.getElementById('edit-book-author').value.trim();
+    book.category = document.querySelector('input[name="edit-book-category"]:checked').value;
+    book.type = document.querySelector('input[name="edit-book-type"]:checked').value;
+    book.coverUrl = document.getElementById('edit-book-cover').value.trim();
+    
+    if (book.type === 'paper') {
+        book.total = parseInt(document.getElementById('edit-total-pages').value) || 0;
+    } else {
+        const hours = parseInt(document.getElementById('edit-total-hours').value) || 0;
+        const minutes = parseInt(document.getElementById('edit-total-minutes').value) || 0;
+        book.total = hours * 60 + minutes;
+    }
+    
+    book.updateStatus();
+    saveBooks();
+    renderBooks();
+    renderStatistics();
+    renderCharts();
+    editModal.style.display = 'none';
+    addActivity('Редактиране', `Редактирана книга "${book.name}"`, book.name);
+}
+
+function showCoverPreview(previewId, url) {
+    const preview = document.getElementById(previewId);
+    if (!preview) return;
+    
+    if (url) {
+        preview.innerHTML = `<img src="${url}" alt="Cover preview" onerror="this.parentElement.innerHTML='<div class=\\'cover-error\\'>Невалиден URL</div>'">`;
+        preview.style.display = 'block';
+    } else {
+        preview.innerHTML = '';
+        preview.style.display = 'none';
+    }
+}
+
+// ========================
+// EXPORT/IMPORT FUNCTIONALITY
+// ========================
+
+function exportData() {
+    const data = {
+        books: books,
+        streaks: { currentStreak, longestStreak },
+        activityFeed: activityFeed,
+        achievements: achievements,
+        dailyGoal: dailyGoal,
+        exportDate: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = `book-tracking-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    
+    addActivity('Експорт', 'Данните са експортирани', '');
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            if (confirm('Сигурни ли сте, че искате да импортирате данни? Това ще замести текущите данни.')) {
+                // Restore books
+                if (data.books) {
+                    books = data.books.map(bookData => {
+                        const book = new Book(
+                            bookData.id,
+                            bookData.name,
+                            bookData.author,
+                            bookData.type,
+                            bookData.total,
+                            bookData.category || 'mama',
+                            bookData.coverUrl || ''
+                        );
+                        book.logs = bookData.logs || [];
+                        book.completed = bookData.completed || false;
+                        book.status = bookData.status || 'planned';
+                        return book;
+                    });
+                    saveBooks();
+                }
+                
+                // Restore streaks
+                if (data.streaks) {
+                    currentStreak = data.streaks.currentStreak || 0;
+                    longestStreak = data.streaks.longestStreak || 0;
+                    saveStreaks();
+                }
+                
+                // Restore activity feed
+                if (data.activityFeed) {
+                    activityFeed = data.activityFeed;
+                    saveActivityFeed();
+                }
+                
+                // Restore achievements
+                if (data.achievements) {
+                    achievements = data.achievements;
+                    saveAchievements();
+                }
+                
+                // Restore daily goal
+                if (data.dailyGoal) {
+                    dailyGoal = data.dailyGoal;
+                }
+                
+                // Re-render everything
+                renderBooks();
+                renderStreakDisplay();
+                renderStatistics();
+                renderActivityFeed();
+                renderAchievements();
+                renderCharts();
+                
+                addActivity('Импорт', 'Данните са импортирани успешно', '');
+                alert('Данните са импортирани успешно!');
+            }
+        } catch (error) {
+            alert('Грешка при импортиране на данни: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
+}
+
+// ========================
+// CHARTS FUNCTIONALITY
+// ========================
+
+let progressChart = null;
+let categoryChart = null;
+
+function renderCharts() {
+    renderProgressChart();
+    renderCategoryChart();
+}
+
+function renderProgressChart() {
+    const ctx = document.getElementById('progress-chart');
+    if (!ctx) return;
+    
+    // Destroy existing chart
+    if (progressChart) {
+        progressChart.destroy();
+    }
+    
+    // Get progress data over last 30 days
+    const days = 30;
+    const today = new Date();
+    const labels = [];
+    const data = [];
+    
+    for (let i = days - 1; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        labels.push(date.toLocaleDateString('bg-BG', { month: 'short', day: 'numeric' }));
+        
+        // Calculate total progress for this day
+        let dayProgress = 0;
+        books.forEach(book => {
+            const dayLogs = book.logs.filter(log => log.date === dateStr);
+            dayProgress += dayLogs.reduce((sum, log) => sum + log.amount, 0);
+        });
+        
+        data.push(dayProgress);
+    }
+    
+    progressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Прочетени страници/минути',
+                data: data,
+                borderColor: '#52b788',
+                backgroundColor: 'rgba(82, 183, 136, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Прогрес през последните 30 дни'
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function renderCategoryChart() {
+    const ctx = document.getElementById('category-chart');
+    if (!ctx) return;
+    
+    // Destroy existing chart
+    if (categoryChart) {
+        categoryChart.destroy();
+    }
+    
+    // Count books by category and status
+    const mamaTotal = books.filter(b => b.category === 'mama').length;
+    const yavorTotal = books.filter(b => b.category === 'yavor').length;
+    const mamaCompleted = books.filter(b => b.category === 'mama' && b.completed).length;
+    const yavorCompleted = books.filter(b => b.category === 'yavor' && b.completed).length;
+    
+    categoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Уговорка с Мама', 'Уговорка с Явор'],
+            datasets: [
+                {
+                    label: 'Завършени',
+                    data: [mamaCompleted, yavorCompleted],
+                    backgroundColor: '#28a745'
+                },
+                {
+                    label: 'В процес',
+                    data: [mamaTotal - mamaCompleted, yavorTotal - yavorCompleted],
+                    backgroundColor: '#ffc107'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Книги по категория'
+                }
+            },
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+}

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Проследяване на книги</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -83,6 +84,12 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label for="book-cover">URL на обложка (опционално):</label>
+                    <input type="url" id="book-cover" placeholder="https://example.com/image.jpg">
+                    <div id="cover-preview" class="cover-preview"></div>
+                </div>
+
                 <button type="submit" class="btn btn-primary">Добави книга</button>
             </form>
         </div>
@@ -130,8 +137,16 @@
         <div class="tab-content" id="statistics" style="display: none;">
             <div class="statistics-container">
                 <h2>� Статистики</h2>
-                
-                <div class="stats-overview">
+                                <!-- Export/Import section -->
+                <div class="export-import-section">
+                    <h3>💾 Експорт и Импорт на данни</h3>
+                    <div class="export-import-buttons">
+                        <button class="btn btn-primary" id="export-data-btn">📥 Изтегли данни (JSON)</button>
+                        <label for="import-data-file" class="btn btn-success">📤 Импортирай данни</label>
+                        <input type="file" id="import-data-file" accept=".json" style="display: none;">
+                    </div>
+                </div>
+                                <div class="stats-overview">
                     <div class="stat-box">
                         <div class="stat-number" id="stat-total-books">0</div>
                         <div class="stat-label">Общо книги</div>
@@ -155,6 +170,17 @@
                         <span class="streak-emoji">🔥</span>
                         <span class="streak-value" id="stat-current-streak">0</span>
                         <span class="streak-text">дни серия</span>
+                    </div>
+                </div>
+
+                <!-- Charts section -->
+                <div class="charts-section">
+                    <h3>📈 Анализ на прогреса</h3>
+                    <div class="chart-container">
+                        <canvas id="progress-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="category-chart"></canvas>
                     </div>
                 </div>
             </div>
@@ -251,6 +277,84 @@
                 <button type="button" class="btn btn-primary" id="save-category">Запази</button>
                 <button type="button" class="btn btn-secondary" id="cancel-category">Отказ</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal for editing book -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Редактирай книга</h2>
+            <form id="edit-book-form">
+                <input type="hidden" id="edit-book-id">
+                
+                <div class="form-group">
+                    <label for="edit-book-name">Име на книга:</label>
+                    <input type="text" id="edit-book-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-book-author">Автор:</label>
+                    <input type="text" id="edit-book-author" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Категория:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="edit-book-category" value="mama">
+                            Уговорка с Мама
+                        </label>
+                        <label>
+                            <input type="radio" name="edit-book-category" value="yavor">
+                            Уговорка с Явор
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Тип:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="edit-book-type" value="paper">
+                            Хартиена книга
+                        </label>
+                        <label>
+                            <input type="radio" name="edit-book-type" value="audio">
+                            Аудио книга
+                        </label>
+                    </div>
+                </div>
+
+                <div id="edit-paper-fields" class="type-fields">
+                    <div class="form-group">
+                        <label for="edit-total-pages">Брой страници:</label>
+                        <input type="number" id="edit-total-pages" min="1">
+                    </div>
+                </div>
+
+                <div id="edit-audio-fields" class="type-fields" style="display: none;">
+                    <div class="form-group">
+                        <label>Продължителност:</label>
+                        <div class="duration-group">
+                            <input type="number" id="edit-total-hours" min="0" placeholder="Часове" value="0">
+                            <span>:</span>
+                            <input type="number" id="edit-total-minutes" min="0" max="59" placeholder="Минути" value="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-book-cover">URL на обложка (опционално):</label>
+                    <input type="url" id="edit-book-cover" placeholder="https://example.com/image.jpg">
+                    <div id="edit-cover-preview" class="cover-preview"></div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Запази промените</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-edit">Отказ</button>
+                </div>
+            </form>
         </div>
     </div>
 

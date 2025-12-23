@@ -1,0 +1,280 @@
+{
+  "books": [
+    {
+      "id": "1766412319229",
+      "name": "Как да печелим приятели и да влиаем на другите",
+      "author": "Дейл Карнеги",
+      "type": "audio",
+      "total": 459,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-23",
+          "amount": 8
+        },
+        {
+          "date": "2025-12-22",
+          "amount": 169
+        },
+        {
+          "date": "2025-12-22",
+          "amount": 51
+        }
+      ],
+      "status": "in-progress",
+      "completed": false
+    },
+    {
+      "id": "1766420912137",
+      "name": "Силата на навиците",
+      "author": "Чарлс Дюиг",
+      "type": "audio",
+      "total": 620,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [],
+      "status": "planned",
+      "completed": false
+    },
+    {
+      "id": "1766421366462",
+      "name": "Седемте навика на високо ефективните хора",
+      "author": "Стивън Кови",
+      "type": "paper",
+      "total": 576,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-23",
+          "amount": 21
+        },
+        {
+          "date": "2025-12-22",
+          "amount": 495
+        }
+      ],
+      "status": "in-progress",
+      "completed": false
+    },
+    {
+      "id": "1766422142182",
+      "name": "Откраднат Фокус",
+      "author": "Юхан Хари",
+      "type": "paper",
+      "total": 296,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [],
+      "status": "planned",
+      "completed": false
+    },
+    {
+      "id": "1766425494287",
+      "name": "Децата на капитан Грант",
+      "author": "Жул Верн",
+      "type": "audio",
+      "total": 1408,
+      "category": "yavor",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-22",
+          "amount": 1408
+        }
+      ],
+      "status": "completed",
+      "completed": true
+    },
+    {
+      "id": "1766426411557",
+      "name": "Цветът на магията",
+      "author": "Тери Пратчет",
+      "type": "audio",
+      "total": 536,
+      "category": "yavor",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-22",
+          "amount": 10
+        }
+      ],
+      "status": "in-progress",
+      "completed": false
+    },
+    {
+      "id": "1766481603376",
+      "name": "Атомни навици",
+      "author": "Джейм Клиър",
+      "type": "paper",
+      "total": 318,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-23",
+          "amount": 318
+        }
+      ],
+      "status": "completed",
+      "completed": true
+    },
+    {
+      "id": "1766481761761",
+      "name": "Тревожното Поколение",
+      "author": "Джонатан Хайд",
+      "type": "paper",
+      "total": 285,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-23",
+          "amount": 285
+        }
+      ],
+      "status": "completed",
+      "completed": true
+    },
+    {
+      "id": "1766481860826",
+      "name": "Помисли Пак",
+      "author": "Адам Грант",
+      "type": "paper",
+      "total": 295,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-23",
+          "amount": 295
+        }
+      ],
+      "status": "completed",
+      "completed": true
+    },
+    {
+      "id": "1766486394417",
+      "name": "Не може да ме нарани",
+      "author": "Дейвид Гогинс",
+      "type": "paper",
+      "total": 329,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-23",
+          "amount": 329
+        }
+      ],
+      "status": "completed",
+      "completed": true
+    },
+    {
+      "id": "1766486698606",
+      "name": "Острова на съкровищата",
+      "author": "Робърт Луис Стивънсън",
+      "type": "audio",
+      "total": 382,
+      "category": "yavor",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-23",
+          "amount": 382
+        }
+      ],
+      "status": "completed",
+      "completed": true
+    },
+    {
+      "id": "1766487369921",
+      "name": "Без Компромис",
+      "author": "Крис Вос и Тал Раз",
+      "type": "paper",
+      "total": 288,
+      "category": "mama",
+      "coverUrl": "",
+      "logs": [
+        {
+          "date": "2025-12-23",
+          "amount": 288
+        }
+      ],
+      "status": "completed",
+      "completed": true
+    }
+  ],
+  "streaks": {
+    "currentStreak": 0,
+    "longestStreak": 2
+  },
+  "activityFeed": [
+    {
+      "type": "Редактиране",
+      "message": "Редактирана книга \"Атомни навици\"",
+      "bookName": "Атомни навици",
+      "date": "2025-12-23T22:12:27.990Z"
+    },
+    {
+      "type": "Прогрес",
+      "message": "8 минути за \"Как да печелим приятели и да влиаем на другите\"",
+      "bookName": "Как да печелим приятели и да влиаем на другите",
+      "date": "2025-12-23T21:48:53.252Z"
+    },
+    {
+      "type": "Постижение",
+      "message": "Отключено: 5 завършени",
+      "bookName": "",
+      "date": "2025-12-23T12:05:46.406Z"
+    },
+    {
+      "type": "Постижение",
+      "message": "Отключено: Първо завършване",
+      "bookName": "",
+      "date": "2025-12-23T12:05:46.406Z"
+    },
+    {
+      "type": "Постижение",
+      "message": "Отключено: 5 книги",
+      "bookName": "",
+      "date": "2025-12-23T12:05:46.406Z"
+    },
+    {
+      "type": "Постижение",
+      "message": "Отключено: Първа книга",
+      "bookName": "",
+      "date": "2025-12-23T12:05:46.405Z"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "first-book",
+      "unlocked": true
+    },
+    {
+      "id": "five-books",
+      "unlocked": true
+    },
+    {
+      "id": "first-complete",
+      "unlocked": true
+    },
+    {
+      "id": "five-complete",
+      "unlocked": true
+    },
+    {
+      "id": "streak-7",
+      "unlocked": false
+    },
+    {
+      "id": "streak-30",
+      "unlocked": false
+    }
+  ],
+  "dailyGoal": 50,
+  "exportDate": "2025-12-23T22:13:05.026Z"
+}
