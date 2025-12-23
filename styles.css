@@ -5,7 +5,7 @@
 }
 
 :root {
-    --bg-primary: #52b788;
+    --bg-primary: #ff8c42;
     --bg-secondary: #ffffff;
     --text-primary: #333;
     --text-secondary: #666;
@@ -102,7 +102,7 @@ header h1 {
 .streak-value {
     font-size: 2.5em;
     font-weight: bold;
-    color: #667eea;
+    color: #333;
     line-height: 1;
     margin-bottom: 5px;
 }
@@ -172,8 +172,8 @@ header h1 {
 
 .filter-btn.active {
     background: white;
-    border-color: #667eea;
-    color: #667eea;
+    border-color: #333;
+    color: #333;
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
@@ -258,7 +258,7 @@ header h1 {
 
 .tab-btn.active {
     background: white;
-    color: #667eea;
+    color: #333;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
@@ -281,7 +281,7 @@ header h1 {
 
 .add-book-section h2 {
     margin-bottom: 20px;
-    color: #667eea;
+    color: #333;
 }
 
 .form-group {
@@ -308,7 +308,7 @@ header h1 {
 
 .form-group input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #333;
 }
 
 .radio-group {
@@ -427,7 +427,7 @@ header h1 {
 
 .books-section h2 {
     margin-bottom: 20px;
-    color: #667eea;
+    color: #333;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -468,9 +468,9 @@ header h1 {
 
 .search-input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #333;
     background: white;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    box-shadow: 0 2px 8px rgba(51, 51, 51, 0.2);
 }
 
 .search-input::placeholder {
@@ -657,7 +657,7 @@ header h1 {
 
 .modal-content h2 {
     margin-bottom: 20px;
-    color: #667eea;
+    color: #333;
 }
 
 .modal-buttons {
@@ -686,7 +686,7 @@ header h1 {
 
 .log-date {
     font-weight: 600;
-    color: #667eea;
+    color: #333;
 }
 
 .log-amount {
@@ -721,7 +721,7 @@ header h1 {
 
 .statistics-container h2 {
     margin-bottom: 30px;
-    color: #667eea;
+    color: #333;
     text-align: center;
     font-size: 2em;
 }
@@ -732,7 +732,7 @@ header h1 {
 
 .stats-section h3 {
     font-size: 1.3em;
-    color: #52b788;
+    color: #333;
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #e0e0e0;
@@ -802,7 +802,7 @@ header h1 {
 
 .month-title {
     font-size: 1.4em;
-    color: #667eea;
+    color: #333;
     margin-bottom: 15px;
     font-weight: 600;
 }
@@ -908,7 +908,7 @@ header h1 {
 .stat-number {
     font-size: 2.5em;
     font-weight: bold;
-    color: #667eea;
+    color: #333;
     margin-bottom: 10px;
 }
 
@@ -961,15 +961,15 @@ header h1 {
 
 .activity-item {
     padding: 15px;
-    border-left: 4px solid #667eea;
-    background: rgba(102, 126, 234, 0.1);
+    border-left: 4px solid #333;
+    background: rgba(51, 51, 51, 0.1);
     margin-bottom: 15px;
     border-radius: 8px;
 }
 
 .activity-type {
     font-weight: 600;
-    color: #667eea;
+    color: #333;
     margin-bottom: 5px;
 }
 
