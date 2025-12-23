@@ -442,33 +442,33 @@ function renderBooks() {
         emptyState.style.display = 'none';
         booksList.innerHTML = '';
 
-        // Group books by category and sort alphabetically
-        const mamaBooks = books.filter(book => book.category === 'mama')
+        // Group books by type and sort alphabetically
+        const paperBooks = books.filter(book => book.type === 'paper')
             .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
-        const yavorBooks = books.filter(book => book.category === 'yavor')
+        const audioBooks = books.filter(book => book.type === 'audio')
             .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
 
-        // Render Mama category
-        if (mamaBooks.length > 0) {
-            const mamaSection = document.createElement('div');
-            mamaSection.className = 'category-section';
-            mamaSection.innerHTML = '<h3 class="category-title">📚 Уговорка с Мама</h3>';
-            booksList.appendChild(mamaSection);
+        // Render Paper books
+        if (paperBooks.length > 0) {
+            const paperSection = document.createElement('div');
+            paperSection.className = 'category-section';
+            paperSection.innerHTML = '<h3 class="category-title">📖 Хартиени книги</h3>';
+            booksList.appendChild(paperSection);
 
-            mamaBooks.forEach(book => {
+            paperBooks.forEach(book => {
                 const bookCard = createBookCard(book);
                 booksList.appendChild(bookCard);
             });
         }
 
-        // Render Yavor category
-        if (yavorBooks.length > 0) {
-            const yavorSection = document.createElement('div');
-            yavorSection.className = 'category-section';
-            yavorSection.innerHTML = '<h3 class="category-title">📚 Уговорка с Явор</h3>';
-            booksList.appendChild(yavorSection);
+        // Render Audio books
+        if (audioBooks.length > 0) {
+            const audioSection = document.createElement('div');
+            audioSection.className = 'category-section';
+            audioSection.innerHTML = '<h3 class="category-title">🎧 Аудио книги</h3>';
+            booksList.appendChild(audioSection);
 
-            yavorBooks.forEach(book => {
+            audioBooks.forEach(book => {
                 const bookCard = createBookCard(book);
                 booksList.appendChild(bookCard);
             });
