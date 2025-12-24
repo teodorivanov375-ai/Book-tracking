@@ -494,6 +494,11 @@ function deleteBook(bookId) {
     }
 }
 
+// Natural sort function for book names with numbers
+function naturalSort(a, b) {
+    return a.name.localeCompare(b.name, 'bg', { numeric: true, sensitivity: 'base' });
+}
+
 // Render books list
 function renderBooks() {
     // Render all books
@@ -518,7 +523,7 @@ function renderBooks() {
 
             // Paper books in Mama category
             const mamaPaperBooks = mamaBooks.filter(book => book.type === 'paper')
-                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+                .sort(naturalSort);
             if (mamaPaperBooks.length > 0) {
                 const paperSection = document.createElement('div');
                 paperSection.className = 'type-section';
@@ -533,7 +538,7 @@ function renderBooks() {
 
             // Audio books in Mama category
             const mamaAudioBooks = mamaBooks.filter(book => book.type === 'audio')
-                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+                .sort(naturalSort);
             if (mamaAudioBooks.length > 0) {
                 const audioSection = document.createElement('div');
                 audioSection.className = 'type-section';
@@ -556,7 +561,7 @@ function renderBooks() {
 
             // Paper books in Yavor category
             const yavorPaperBooks = yavorBooks.filter(book => book.type === 'paper')
-                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+                .sort(naturalSort);
             if (yavorPaperBooks.length > 0) {
                 const paperSection = document.createElement('div');
                 paperSection.className = 'type-section';
@@ -571,7 +576,7 @@ function renderBooks() {
 
             // Audio books in Yavor category
             const yavorAudioBooks = yavorBooks.filter(book => book.type === 'audio')
-                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+                .sort(naturalSort);
             if (yavorAudioBooks.length > 0) {
                 const audioSection = document.createElement('div');
                 audioSection.className = 'type-section';
@@ -594,7 +599,7 @@ function renderBooks() {
 
             // Paper books in Choice category
             const choicePaperBooks = choiceBooks.filter(book => book.type === 'paper')
-                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+                .sort(naturalSort);
             if (choicePaperBooks.length > 0) {
                 const paperSection = document.createElement('div');
                 paperSection.className = 'type-section';
@@ -609,7 +614,7 @@ function renderBooks() {
 
             // Audio books in Choice category
             const choiceAudioBooks = choiceBooks.filter(book => book.type === 'audio')
-                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+                .sort(naturalSort);
             if (choiceAudioBooks.length > 0) {
                 const audioSection = document.createElement('div');
                 audioSection.className = 'type-section';
@@ -881,7 +886,7 @@ function renderCompletedBooks() {
     const completedCountBadge = document.getElementById('completed-count');
     
     const completedBooks = books.filter(book => book.completed)
-        .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+        .sort(naturalSort);
     
     // Update count badge
     if (completedCountBadge) {
