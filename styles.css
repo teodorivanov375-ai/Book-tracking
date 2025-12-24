@@ -389,36 +389,36 @@ header h1 {
 }
 
 .btn-category {
-    background: #6c757d;
+    background: #9c27b0;
     color: white;
     padding: 8px 12px;
     font-size: 16px;
 }
 
 .btn-category:hover {
-    background: #5a6268;
+    background: #7b1fa2;
 }
 
 .btn-status {
-    background: #17a2b8;
+    background: #2196f3;
     color: white;
     padding: 8px 12px;
     font-size: 16px;
 }
 
 .btn-status:hover {
-    background: #138496;
+    background: #1976d2;
 }
 
 .btn-danger {
-    background: #dc3545;
+    background: #f44336;
     color: white;
     padding: 8px 15px;
     font-size: 14px;
 }
 
 .btn-danger:hover {
-    background: #c82333;
+    background: #d32f2f;
 }
 
 .btn-complete {
@@ -1252,11 +1252,11 @@ header h1 {
 
 /* Edit Button */
 .btn-info {
-    background: #17a2b8;
+    background: #ff9800;
 }
 
 .btn-info:hover {
-    background: #138496;
+    background: #e68900;
 }
 
 /* Animations */
