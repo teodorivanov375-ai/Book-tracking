@@ -30,12 +30,14 @@
             <form id="add-book-form">
                 <div class="form-group">
                     <label for="book-name">Име на книга:</label>
-                    <input type="text" id="book-name" required>
+                    <input type="text" id="book-name" list="book-names-list" required autocomplete="off">
+                    <datalist id="book-names-list"></datalist>
                 </div>
 
                 <div class="form-group">
                     <label for="book-author">Автор:</label>
-                    <input type="text" id="book-author" required>
+                    <input type="text" id="book-author" list="authors-list" required autocomplete="off">
+                    <datalist id="authors-list"></datalist>
                 </div>
 
                 <div class="form-group">

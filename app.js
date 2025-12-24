@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAchievements();
     setupEventListeners();
     initializeAchievements();
+    updateAutocomplete(); // Update autocomplete lists
     // Set default filter to 'mama'
     filterBooksByCategory('mama');
 });
@@ -253,6 +254,15 @@ function switchTab(tabName) {
         activeTab.style.display = 'block';
     }
     
+    // Update tab buttons active state
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    const activeBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+    
     // Update statistics when switching to statistics tab
     if (tabName === 'statistics') {
         renderStatistics();
@@ -293,6 +303,9 @@ function handleAddBook(e) {
     
     // Reset cover preview
     showCoverPreview('cover-preview', '');
+    
+    // Update autocomplete lists
+    updateAutocomplete();
     
     // Add activity and check achievements
     addActivity('Добавяне', `Добавена книга "${name}"`, name);
@@ -989,6 +1002,48 @@ function renderStatistics() {
     if (statCompletedBooks) statCompletedBooks.textContent = books.filter(b => b.completed).length;
     if (statTotalPages) statTotalPages.textContent = totalPagesRead;
     if (statTotalAudio) statTotalAudio.textContent = audioTimeStr;
+}
+
+// ========================
+// AUTOCOMPLETE
+// ========================
+
+function updateAutocomplete() {
+    // Sort books by most recent first (higher id = more recent)
+    const sortedBooks = [...books].sort((a, b) => b.id - a.id);
+    
+    // Get unique book names and authors (preserving order - most recent first)
+    const bookNames = [];
+    const authors = [];
+    const seenNames = new Set();
+    const seenAuthors = new Set();
+    
+    sortedBooks.forEach(book => {
+        if (!seenNames.has(book.name)) {
+            bookNames.push(book.name);
+            seenNames.add(book.name);
+        }
+        if (!seenAuthors.has(book.author)) {
+            authors.push(book.author);
+            seenAuthors.add(book.author);
+        }
+    });
+    
+    // Update book names datalist
+    const bookNamesList = document.getElementById('book-names-list');
+    if (bookNamesList) {
+        bookNamesList.innerHTML = bookNames.map(name => 
+            `<option value="${name}">`
+        ).join('');
+    }
+    
+    // Update authors datalist
+    const authorsList = document.getElementById('authors-list');
+    if (authorsList) {
+        authorsList.innerHTML = authors.map(author => 
+            `<option value="${author}">`
+        ).join('');
+    }
 }
 
 // ========================
