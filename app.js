@@ -56,6 +56,7 @@ let achievements = [];
 let dailyGoal = 50; // pages per day
 let theme = 'light';
 let currentCategoryFilter = 'mama'; // Track current category filter
+let hiddenSuggestions = { names: [], authors: [] }; // Hidden autocomplete suggestions
 
 // ========================
 // DOM ELEMENTS
@@ -82,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadStreaks();
     loadActivityFeed();
     loadAchievements();
+    loadHiddenSuggestions();
     updateStreaks();
     renderBooks();
     renderStreakDisplay();
@@ -847,6 +849,41 @@ function loadBooks() {
     }
 }
 
+// Save hidden suggestions to localStorage
+function saveHiddenSuggestions() {
+    localStorage.setItem('hiddenSuggestions', JSON.stringify(hiddenSuggestions));
+}
+
+// Load hidden suggestions from localStorage
+function loadHiddenSuggestions() {
+    const saved = localStorage.getItem('hiddenSuggestions');
+    if (saved) {
+        hiddenSuggestions = JSON.parse(saved);
+    }
+}
+
+// Hide suggestion from autocomplete
+function hideSuggestion(type, value) {
+    if (type === 'name' && !hiddenSuggestions.names.includes(value)) {
+        hiddenSuggestions.names.push(value);
+    } else if (type === 'author' && !hiddenSuggestions.authors.includes(value)) {
+        hiddenSuggestions.authors.push(value);
+    }
+    saveHiddenSuggestions();
+    updateAutocomplete();
+}
+
+// Show suggestion in autocomplete
+function showSuggestion(type, value) {
+    if (type === 'name') {
+        hiddenSuggestions.names = hiddenSuggestions.names.filter(n => n !== value);
+    } else if (type === 'author') {
+        hiddenSuggestions.authors = hiddenSuggestions.authors.filter(a => a !== value);
+    }
+    saveHiddenSuggestions();
+    updateAutocomplete();
+}
+
 // Handle search
 function handleSearch(e) {
     const searchTerm = e.target.value.toLowerCase().trim();
@@ -1024,17 +1061,17 @@ function updateAutocomplete() {
     const seenAuthors = new Set();
     
     sortedBooks.forEach(book => {
-        if (!seenNames.has(book.name)) {
+        if (!seenNames.has(book.name) && !hiddenSuggestions.names.includes(book.name)) {
             bookNames.push(book.name);
             seenNames.add(book.name);
         }
-        if (!seenAuthors.has(book.author)) {
+        if (!seenAuthors.has(book.author) && !hiddenSuggestions.authors.includes(book.author)) {
             authors.push(book.author);
             seenAuthors.add(book.author);
         }
     });
     
-    // Update book names datalist
+    // Update book names datalist with delete buttons
     const bookNamesList = document.getElementById('book-names-list');
     if (bookNamesList) {
         bookNamesList.innerHTML = bookNames.map(name => 
@@ -1049,6 +1086,39 @@ function updateAutocomplete() {
             `<option value="${author}">`
         ).join('');
     }
+}
+
+// Open suggestions manager modal
+function openSuggestionsManager(type) {
+    const modal = document.getElementById('suggestions-modal');
+    const title = document.getElementById('suggestions-modal-title');
+    const list = document.getElementById('suggestions-list');
+    
+    title.textContent = type === 'name' ? 'Управление на имена на книги' : 'Управление на автори';
+    
+    // Get all unique suggestions
+    const allSuggestions = [...new Set(books.map(b => type === 'name' ? b.name : b.author))].sort();
+    const hidden = type === 'name' ? hiddenSuggestions.names : hiddenSuggestions.authors;
+    
+    list.innerHTML = allSuggestions.map(suggestion => {
+        const isHidden = hidden.includes(suggestion);
+        return `
+            <div class="suggestion-item">
+                <span>${suggestion}</span>
+                <button class="btn-small ${isHidden ? 'btn-show' : 'btn-hide'}" 
+                        onclick="${isHidden ? 'showSuggestion' : 'hideSuggestion'}('${type}', '${suggestion.replace(/'/g, "\\'")}'); openSuggestionsManager('${type}')">
+                    ${isHidden ? '👁️ Покажи' : '🚫 Скрий'}
+                </button>
+            </div>
+        `;
+    }).join('');
+    
+    modal.style.display = 'flex';
+}
+
+// Close suggestions manager modal
+function closeSuggestionsManager() {
+    document.getElementById('suggestions-modal').style.display = 'none';
 }
 
 // ========================

@@ -29,13 +29,19 @@
             <h2>Добави нова книга</h2>
             <form id="add-book-form">
                 <div class="form-group">
-                    <label for="book-name">Име на книга:</label>
+                    <label for="book-name">
+                        Име на книга:
+                        <button type="button" class="manage-suggestions-btn" onclick="openSuggestionsManager('name')" title="Управление на предложения">⚙️</button>
+                    </label>
                     <input type="text" id="book-name" list="book-names-list" required autocomplete="off">
                     <datalist id="book-names-list"></datalist>
                 </div>
 
                 <div class="form-group">
-                    <label for="book-author">Автор:</label>
+                    <label for="book-author">
+                        Автор:
+                        <button type="button" class="manage-suggestions-btn" onclick="openSuggestionsManager('author')" title="Управление на предложения">⚙️</button>
+                    </label>
                     <input type="text" id="book-author" list="authors-list" required autocomplete="off">
                     <datalist id="authors-list"></datalist>
                 </div>
@@ -368,7 +374,14 @@
         </div>
     </div>
 
-
+    <!-- Suggestions Manager Modal -->
+    <div id="suggestions-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="suggestions-modal-title">Управление на предложения</h3>
+            <div id="suggestions-list"></div>
+            <button type="button" class="btn btn-secondary" onclick="closeSuggestionsManager()">Затвори</button>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

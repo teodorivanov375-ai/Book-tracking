@@ -421,6 +421,67 @@ header h1 {
     background: #218838;
 }
 
+.btn-small {
+    padding: 4px 10px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-hide {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-hide:hover {
+    background: #c82333;
+}
+
+.btn-show {
+    background: #28a745;
+    color: white;
+}
+
+.btn-show:hover {
+    background: #218838;
+}
+
+.manage-suggestions-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 8px;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.manage-suggestions-btn:hover {
+    opacity: 1;
+}
+
+.suggestion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.suggestion-item span {
+    flex: 1;
+}
+
+#suggestions-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 15px 0;
+}
+
 /* Books Section */
 .books-section {
     /* Removed conflicting styles - inherits from .tab-content */
