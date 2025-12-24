@@ -10,7 +10,7 @@ class Book {
         this.author = author;
         this.type = type; // 'paper' or 'audio'
         this.total = total; // total pages or total minutes
-        this.category = category; // 'mama' or 'yavor'
+        this.category = category; // 'mama', 'yavor', or 'choice'
         this.coverUrl = coverUrl; // book cover image URL
         this.logs = []; // array of {date, amount}
         this.status = 'planned'; // 'planned', 'in-progress', 'completed'
@@ -490,6 +490,7 @@ function renderBooks() {
         // Group books by category
         const mamaBooks = books.filter(book => book.category === 'mama');
         const yavorBooks = books.filter(book => book.category === 'yavor');
+        const choiceBooks = books.filter(book => book.category === 'choice');
 
         // Render Mama category
         if (mamaBooks.length > 0) {
@@ -561,6 +562,44 @@ function renderBooks() {
                 booksList.appendChild(audioSection);
 
                 yavorAudioBooks.forEach(book => {
+                    const bookCard = createBookCard(book);
+                    booksList.appendChild(bookCard);
+                });
+            }
+        }
+
+        // Render Choice category
+        if (choiceBooks.length > 0) {
+            const choiceCategorySection = document.createElement('div');
+            choiceCategorySection.className = 'category-section';
+            choiceCategorySection.innerHTML = '<h3 class="category-title">📚 По желание</h3>';
+            booksList.appendChild(choiceCategorySection);
+
+            // Paper books in Choice category
+            const choicePaperBooks = choiceBooks.filter(book => book.type === 'paper')
+                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+            if (choicePaperBooks.length > 0) {
+                const paperSection = document.createElement('div');
+                paperSection.className = 'type-section';
+                paperSection.innerHTML = '<h4 class="type-title">📖 Хартиени книги</h4>';
+                booksList.appendChild(paperSection);
+
+                choicePaperBooks.forEach(book => {
+                    const bookCard = createBookCard(book);
+                    booksList.appendChild(bookCard);
+                });
+            }
+
+            // Audio books in Choice category
+            const choiceAudioBooks = choiceBooks.filter(book => book.type === 'audio')
+                .sort((a, b) => a.name.localeCompare(b.name, 'bg'));
+            if (choiceAudioBooks.length > 0) {
+                const audioSection = document.createElement('div');
+                audioSection.className = 'type-section';
+                audioSection.innerHTML = '<h4 class="type-title">🎧 Аудио книги</h4>';
+                booksList.appendChild(audioSection);
+
+                choiceAudioBooks.forEach(book => {
                     const bookCard = createBookCard(book);
                     booksList.appendChild(bookCard);
                 });
@@ -882,39 +921,33 @@ function filterBooksByCategory(category) {
     const typeSections = document.querySelectorAll('.type-section');
     const bookCards = document.querySelectorAll('#books-list .book-card');
     
-    if (category === 'all') {
-        // Show all
-        categorySections.forEach(section => section.style.display = 'block');
-        typeSections.forEach(section => section.style.display = 'block');
-        bookCards.forEach(card => card.style.display = 'block');
-    } else {
-        // Hide all first
-        categorySections.forEach(section => section.style.display = 'none');
-        typeSections.forEach(section => section.style.display = 'none');
-        bookCards.forEach(card => card.style.display = 'none');
-        
-        // Show only selected category
-        let shouldShowBooks = false;
-        const allElements = document.querySelectorAll('#books-list > *');
-        
-        allElements.forEach(element => {
-            if (element.classList.contains('category-section')) {
-                const title = element.querySelector('.category-title').textContent;
-                if ((category === 'mama' && title.includes('Мама')) || 
-                    (category === 'yavor' && title.includes('Явор'))) {
-                    element.style.display = 'block';
-                    shouldShowBooks = true;
-                } else {
-                    element.style.display = 'none';
-                    shouldShowBooks = false;
-                }
-            } else if (element.classList.contains('type-section') && shouldShowBooks) {
+    // Hide all first
+    categorySections.forEach(section => section.style.display = 'none');
+    typeSections.forEach(section => section.style.display = 'none');
+    bookCards.forEach(card => card.style.display = 'none');
+    
+    // Show only selected category
+    let shouldShowBooks = false;
+    const allElements = document.querySelectorAll('#books-list > *');
+    
+    allElements.forEach(element => {
+        if (element.classList.contains('category-section')) {
+            const title = element.querySelector('.category-title').textContent;
+            if ((category === 'mama' && title.includes('Мама')) || 
+                (category === 'yavor' && title.includes('Явор')) ||
+                (category === 'choice' && title.includes('По желание'))) {
                 element.style.display = 'block';
-            } else if (element.classList.contains('book-card') && shouldShowBooks) {
-                element.style.display = 'block';
+                shouldShowBooks = true;
+            } else {
+                element.style.display = 'none';
+                shouldShowBooks = false;
             }
-        });
-    }
+        } else if (element.classList.contains('type-section') && shouldShowBooks) {
+            element.style.display = 'block';
+        } else if (element.classList.contains('book-card') && shouldShowBooks) {
+            element.style.display = 'block';
+        }
+    });
 }
 
 // Render statistics
