@@ -108,14 +108,14 @@ function setupEventListeners() {
     // Tab switching
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const tabName = e.target.dataset.tab;
+            const tabName = e.currentTarget.dataset.tab;
             switchTab(tabName);
             
             // Update active state
             document.querySelectorAll('.tab-btn').forEach(item => {
                 item.classList.remove('active');
             });
-            e.target.classList.add('active');
+            e.currentTarget.classList.add('active');
         });
     });
 
@@ -126,10 +126,10 @@ function setupEventListeners() {
             document.querySelectorAll('.filter-btn').forEach(item => {
                 item.classList.remove('active');
             });
-            e.target.classList.add('active');
+            e.currentTarget.classList.add('active');
             
             // Filter books
-            const category = e.target.dataset.category;
+            const category = e.currentTarget.dataset.category;
             currentCategoryFilter = category; // Save current filter
             filterBooksByCategory(category);
         });
@@ -971,10 +971,24 @@ function renderStatistics() {
     const statTotalPages = document.getElementById('stat-total-pages');
     const statTotalAudio = document.getElementById('stat-total-audio');
     
+    // Calculate total pages read from paper books
+    const totalPagesRead = books
+        .filter(b => b.type === 'paper')
+        .reduce((sum, book) => sum + book.getTotalProgress(), 0);
+    
+    // Calculate total audio time listened (in minutes)
+    const totalAudioMinutes = books
+        .filter(b => b.type === 'audio')
+        .reduce((sum, book) => sum + book.getTotalProgress(), 0);
+    
+    const audioHours = Math.floor(totalAudioMinutes / 60);
+    const audioMins = totalAudioMinutes % 60;
+    const audioTimeStr = audioMins > 0 ? `${audioHours}ч ${audioMins}м` : `${audioHours}ч`;
+    
     if (statTotalBooks) statTotalBooks.textContent = books.length;
     if (statCompletedBooks) statCompletedBooks.textContent = books.filter(b => b.completed).length;
-    if (statTotalPages) statTotalPages.textContent = '2031';
-    if (statTotalAudio) statTotalAudio.textContent = '33ч';
+    if (statTotalPages) statTotalPages.textContent = totalPagesRead;
+    if (statTotalAudio) statTotalAudio.textContent = audioTimeStr;
 }
 
 // ========================
