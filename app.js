@@ -89,6 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
     renderAchievements();
     setupEventListeners();
     initializeAchievements();
+    // Set default filter to 'mama'
+    filterBooksByCategory('mama');
 });
 
 // ========================
