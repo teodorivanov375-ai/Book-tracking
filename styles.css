@@ -642,6 +642,8 @@ header h1 {
     border-radius: 15px;
     width: 90%;
     max-width: 500px;
+    max-height: 85vh;
+    overflow-y: auto;
     position: relative;
     animation: slideDown 0.3s;
 }
