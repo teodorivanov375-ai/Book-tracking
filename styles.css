@@ -1108,20 +1108,24 @@ header h1 {
 
 /* Book Cover Styles */
 .book-cover-small {
-    width: 60px;
-    min-width: 60px;
-    height: 90px;
+    width: 100px;
+    min-width: 100px;
+    max-height: 150px;
     border-radius: 5px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     flex-shrink: 0;
     background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .book-cover-small img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    max-height: 150px;
+    object-fit: contain;
     display: block;
 }
 
