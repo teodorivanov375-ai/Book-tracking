@@ -55,6 +55,7 @@ let activityFeed = []; // {type, message, date, bookName}
 let achievements = [];
 let dailyGoal = 50; // pages per day
 let theme = 'light';
+let currentCategoryFilter = 'mama'; // Track current category filter
 
 // ========================
 // DOM ELEMENTS
@@ -129,6 +130,7 @@ function setupEventListeners() {
             
             // Filter books
             const category = e.target.dataset.category;
+            currentCategoryFilter = category; // Save current filter
             filterBooksByCategory(category);
         });
     });
@@ -611,6 +613,11 @@ function renderBooks() {
 
     // Render completed books
     renderCompletedBooks();
+    
+    // Reapply current category filter
+    if (currentCategoryFilter) {
+        filterBooksByCategory(currentCategoryFilter);
+    }
 }
 
 // Generate gradient based on percentage
