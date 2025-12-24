@@ -399,6 +399,17 @@ header h1 {
     background: #5a6268;
 }
 
+.btn-status {
+    background: #17a2b8;
+    color: white;
+    padding: 8px 12px;
+    font-size: 16px;
+}
+
+.btn-status:hover {
+    background: #138496;
+}
+
 .btn-danger {
     background: #dc3545;
     color: white;
@@ -480,6 +491,49 @@ header h1 {
     max-height: 400px;
     overflow-y: auto;
     margin: 15px 0;
+}
+
+/* Status Modal */
+.status-options {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.status-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    background: #f8f9fa;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 120px;
+}
+
+.status-option:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.status-option.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+}
+
+.status-icon {
+    font-size: 32px;
+}
+
+.status-option span:last-child {
+    font-weight: 600;
+    color: #333;
 }
 
 /* Books Section */

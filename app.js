@@ -467,18 +467,24 @@ function toggleBookCompletion(bookId) {
         if (remaining > 0) {
             // Add remaining amount as a log entry for today
             const today = new Date().toISOString().split('T')[0];
-            book.logs.push({ date: today, amount: remaining });
+            book.logs.push({ date: today, amount: remaining, autoAdded: true });
             book.logs.sort((a, b) => new Date(b.date) - new Date(a.date));
         }
         addActivity('Завършване', `Завършена книга "${book.name}"`, book.name);
+        book.completed = true;
+    } else {
+        // If unmarking as completed, remove ALL auto-added logs
+        book.logs = book.logs.filter(log => !log.autoAdded);
+        addActivity('Промяна', `Книга "${book.name}" маркирана като незавършена`, book.name);
+        book.completed = false;
     }
 
-    book.completed = !book.completed;
     book.updateStatus();
     saveBooks();
     updateStreaks();
     saveStreaks();
     renderBooks();
+    renderCompletedBooks();
     renderStreakDisplay();
     renderStatistics();
     checkAchievements();
@@ -703,6 +709,7 @@ function createBookCard(book) {
                 <button class="btn btn-success" onclick="openLogModal('${book.id}')">+ Прогрес</button>
                 <button class="btn btn-info" onclick="openEditModal('${book.id}')" title="Редактирай">✏️</button>
                 <button class="btn btn-category" onclick="openCategoryModal('${book.id}')" title="Промени категория">📁</button>
+                <button class="btn btn-status" onclick="openStatusModal('${book.id}')" title="Промени статус">📊</button>
                 <button class="btn btn-complete" onclick="toggleBookCompletion('${book.id}')">
                     ${book.completed ? '↩️ Незавършена' : '✓ Завършена'}
                 </button>
@@ -1119,6 +1126,66 @@ function openSuggestionsManager(type) {
 // Close suggestions manager modal
 function closeSuggestionsManager() {
     document.getElementById('suggestions-modal').style.display = 'none';
+}
+
+// ========================
+// STATUS MANAGEMENT
+// ========================
+
+function openStatusModal(bookId) {
+    const modal = document.getElementById('status-modal');
+    const bookIdInput = document.getElementById('status-book-id');
+    const book = books.find(b => b.id === bookId);
+    
+    if (!book) return;
+    
+    bookIdInput.value = bookId;
+    
+    // Add click handlers to status options
+    document.querySelectorAll('.status-option').forEach(btn => {
+        btn.onclick = () => changeBookStatus(bookId, btn.dataset.status);
+        
+        // Highlight current status
+        if (btn.dataset.status === book.status) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    modal.style.display = 'flex';
+}
+
+function closeStatusModal() {
+    document.getElementById('status-modal').style.display = 'none';
+}
+
+function changeBookStatus(bookId, newStatus) {
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+    
+    book.status = newStatus;
+    
+    // Update completed flag based on status
+    if (newStatus === 'completed') {
+        book.completed = true;
+    } else if (newStatus === 'planned' || newStatus === 'in-progress') {
+        book.completed = false;
+    }
+    
+    saveBooks();
+    renderBooks();
+    renderCompletedBooks();
+    renderStatistics();
+    closeStatusModal();
+    
+    // Add activity
+    const statusNames = {
+        'planned': 'Планирана',
+        'in-progress': 'В процес',
+        'completed': 'Завършена'
+    };
+    addActivity('Промяна', `Статус на "${book.name}" променен на ${statusNames[newStatus]}`, book.name);
 }
 
 // ========================

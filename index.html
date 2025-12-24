@@ -383,6 +383,29 @@
         </div>
     </div>
 
+    <!-- Status Change Modal -->
+    <div id="status-modal" class="modal">
+        <div class="modal-content">
+            <h3>Промени статус на книга</h3>
+            <input type="hidden" id="status-book-id">
+            <div class="status-options">
+                <button class="status-option" data-status="planned">
+                    <span class="status-icon">📋</span>
+                    <span>Планирана</span>
+                </button>
+                <button class="status-option" data-status="in-progress">
+                    <span class="status-icon">📖</span>
+                    <span>В процес</span>
+                </button>
+                <button class="status-option" data-status="completed">
+                    <span class="status-icon">✅</span>
+                    <span>Завършена</span>
+                </button>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="closeStatusModal()">Отказ</button>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
