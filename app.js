@@ -395,7 +395,7 @@ function openLogsModal(bookId) {
     if (book.logs.length === 0) {
         logsList.innerHTML = '<div class="no-logs">Все още няма записан прогрес</div>';
     } else {
-        book.logs.forEach(log => {
+        book.logs.forEach((log, index) => {
             const logEntry = document.createElement('div');
             logEntry.className = 'log-entry';
             
@@ -417,12 +417,43 @@ function openLogsModal(bookId) {
             logEntry.innerHTML = `
                 <span class="log-date">${dateFormatted}</span>
                 <span class="log-amount">${amountText}</span>
+                <button class="delete-log-btn" onclick="deleteLog('${bookId}', ${index})" title="Изтрий">🗑️</button>
             `;
             logsList.appendChild(logEntry);
         });
     }
 
     logsModal.style.display = 'block';
+}
+
+// Delete a log entry
+function deleteLog(bookId, logIndex) {
+    if (!confirm('Сигурни ли сте, че искате да изтриете този запис за прогрес?')) {
+        return;
+    }
+
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    // Remove the log entry
+    book.logs.splice(logIndex, 1);
+    
+    // Update book status based on remaining logs
+    book.updateStatus();
+    
+    // Save and refresh
+    saveBooks();
+    updateStreaks();
+    saveStreaks();
+    renderBooks();
+    renderStreakDisplay();
+    renderStatistics();
+    
+    // Refresh the logs modal
+    openLogsModal(bookId);
+    
+    // Add activity
+    addActivity('Изтриване', `Изтрит запис за прогрес на "${book.name}"`, book.name);
 }
 
 // Open category modal

@@ -811,6 +811,7 @@ header h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 10px;
 }
 
 .log-entry:last-child {
@@ -824,6 +825,35 @@ header h1 {
 
 .log-amount {
     color: #555;
+    flex: 1;
+}
+
+.delete-log-btn {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.delete-log-btn:hover {
+    background: #c82333;
+    transform: scale(1.1);
+}
+
+body.dark-mode .log-date {
+    color: #eee;
+}
+
+body.dark-mode .log-amount {
+    color: #ccc;
+}
+
+body.dark-mode .log-entry {
+    border-bottom-color: #555;
 }
 
 .no-logs {
