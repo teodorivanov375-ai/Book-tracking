@@ -347,6 +347,39 @@ header h1 {
     font-weight: bold;
 }
 
+/* Page and Time Range Inputs */
+.page-range-group,
+.time-range-group {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.range-input {
+    flex: 1;
+    min-width: 150px;
+}
+
+.range-input label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.range-input input {
+    width: 100%;
+}
+
+.calculated-progress {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: 600;
+    text-align: center;
+    background: rgba(40, 167, 69, 0.1);
+}
+
 .btn {
     padding: 12px 25px;
     border: none;
@@ -927,6 +960,12 @@ body.dark-mode .delete-log-btn:hover {
 .log-amount {
     color: #555;
     flex: 1;
+}
+
+.log-range {
+    color: #777;
+    font-size: 0.9em;
+    font-style: italic;
 }
 
 .delete-log-btn {

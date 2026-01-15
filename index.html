@@ -233,17 +233,41 @@
                 </div>
 
                 <div id="log-paper-field" class="form-group">
-                    <label for="log-pages">Прочетени страници:</label>
-                    <input type="number" id="log-pages" min="1">
+                    <label>Прочетени страници:</label>
+                    <div class="page-range-group">
+                        <div class="range-input">
+                            <label for="log-page-from">От страница:</label>
+                            <input type="number" id="log-page-from" min="1" placeholder="От">
+                        </div>
+                        <div class="range-input">
+                            <label for="log-page-to">До страница:</label>
+                            <input type="number" id="log-page-to" min="1" placeholder="До">
+                        </div>
+                    </div>
+                    <div class="calculated-progress" id="paper-progress-display"></div>
                 </div>
 
                 <div id="log-audio-field" class="form-group" style="display: none;">
                     <label>Време на слушане:</label>
-                    <div class="duration-group">
-                        <input type="number" id="log-hours" min="0" placeholder="Часове" value="0">
-                        <span>:</span>
-                        <input type="number" id="log-minutes" min="0" max="59" placeholder="Минути" value="0">
+                    <div class="time-range-group">
+                        <div class="range-input">
+                            <label>От време (ч:м):</label>
+                            <div class="duration-group">
+                                <input type="number" id="log-audio-from-hours" min="0" placeholder="ч" value="0">
+                                <span>:</span>
+                                <input type="number" id="log-audio-from-minutes" min="0" max="59" placeholder="м" value="0">
+                            </div>
+                        </div>
+                        <div class="range-input">
+                            <label>До време (ч:м):</label>
+                            <div class="duration-group">
+                                <input type="number" id="log-audio-to-hours" min="0" placeholder="ч" value="0">
+                                <span>:</span>
+                                <input type="number" id="log-audio-to-minutes" min="0" max="59" placeholder="м" value="0">
+                            </div>
+                        </div>
                     </div>
+                    <div class="calculated-progress" id="audio-progress-display"></div>
                 </div>
 
                 <div class="modal-buttons">
