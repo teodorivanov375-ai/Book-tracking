@@ -473,6 +473,107 @@ header h1 {
     opacity: 1;
 }
 
+/* Dark mode button styles */
+body.dark-mode .btn-primary {
+    background: #20c997;
+    box-shadow: 0 2px 8px rgba(32, 201, 151, 0.3);
+}
+
+body.dark-mode .btn-primary:hover {
+    background: #1aa179;
+    box-shadow: 0 5px 15px rgba(32, 201, 151, 0.5);
+}
+
+body.dark-mode .btn-secondary {
+    background: #495057;
+    box-shadow: 0 2px 8px rgba(73, 80, 87, 0.3);
+}
+
+body.dark-mode .btn-secondary:hover {
+    background: #343a40;
+    box-shadow: 0 5px 15px rgba(73, 80, 87, 0.5);
+}
+
+body.dark-mode .btn-success {
+    background: #17a2b8;
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+body.dark-mode .btn-success:hover {
+    background: #117a8b;
+    box-shadow: 0 5px 15px rgba(23, 162, 184, 0.5);
+}
+
+body.dark-mode .btn-category {
+    background: #e91e63;
+    box-shadow: 0 2px 8px rgba(233, 30, 99, 0.3);
+}
+
+body.dark-mode .btn-category:hover {
+    background: #c2185b;
+    box-shadow: 0 5px 15px rgba(233, 30, 99, 0.5);
+}
+
+body.dark-mode .btn-status {
+    background: #00bcd4;
+    box-shadow: 0 2px 8px rgba(0, 188, 212, 0.3);
+}
+
+body.dark-mode .btn-status:hover {
+    background: #0097a7;
+    box-shadow: 0 5px 15px rgba(0, 188, 212, 0.5);
+}
+
+body.dark-mode .btn-danger {
+    background: #ff5252;
+    box-shadow: 0 2px 8px rgba(255, 82, 82, 0.3);
+}
+
+body.dark-mode .btn-danger:hover {
+    background: #ff1744;
+    box-shadow: 0 5px 15px rgba(255, 82, 82, 0.5);
+}
+
+body.dark-mode .btn-complete {
+    background: #66bb6a;
+    box-shadow: 0 2px 8px rgba(102, 187, 106, 0.3);
+}
+
+body.dark-mode .btn-complete:hover {
+    background: #43a047;
+    box-shadow: 0 5px 15px rgba(102, 187, 106, 0.5);
+}
+
+body.dark-mode .btn-hide {
+    background: #ff5252;
+    box-shadow: 0 2px 8px rgba(255, 82, 82, 0.3);
+}
+
+body.dark-mode .btn-hide:hover {
+    background: #ff1744;
+    box-shadow: 0 5px 15px rgba(255, 82, 82, 0.5);
+}
+
+body.dark-mode .btn-show {
+    background: #66bb6a;
+    box-shadow: 0 2px 8px rgba(102, 187, 106, 0.3);
+}
+
+body.dark-mode .btn-show:hover {
+    background: #43a047;
+    box-shadow: 0 5px 15px rgba(102, 187, 106, 0.5);
+}
+
+body.dark-mode .delete-log-btn {
+    background: #ff5252;
+    box-shadow: 0 2px 8px rgba(255, 82, 82, 0.3);
+}
+
+body.dark-mode .delete-log-btn:hover {
+    background: #ff1744;
+    box-shadow: 0 5px 15px rgba(255, 82, 82, 0.5);
+}
+
 .suggestion-item {
     display: flex;
     justify-content: space-between;

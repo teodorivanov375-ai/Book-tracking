@@ -1,4 +1,4 @@
-// ========================
+﻿// ========================
 // DATA MODEL
 // ========================
 
@@ -171,10 +171,11 @@ function setupEventListeners() {
 
     // Modal close buttons
     document.querySelectorAll('.close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', () => {
-            logModal.style.display = 'none';
-            logsModal.style.display = 'none';
-            document.getElementById('category-modal').style.display = 'none';
+        closeBtn.addEventListener('click', (e) => {
+            const modal = e.target.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
         });
     });
 
@@ -238,6 +239,14 @@ function setupEventListeners() {
         const categoryModal = document.getElementById('category-modal');
         if (e.target === categoryModal) {
             categoryModal.style.display = 'none';
+        }
+        const statusModal = document.getElementById('status-modal');
+        if (e.target === statusModal) {
+            statusModal.style.display = 'none';
+        }
+        const suggestionsModal = document.getElementById('suggestions-modal');
+        if (e.target === suggestionsModal) {
+            suggestionsModal.style.display = 'none';
         }
     });
 }
@@ -739,8 +748,6 @@ function createBookCard(book) {
             <div class="book-actions">
                 <button class="btn btn-success" onclick="openLogModal('${book.id}')">+ Прогрес</button>
                 <button class="btn btn-info" onclick="openEditModal('${book.id}')" title="Редактирай">✏️</button>
-                <button class="btn btn-category" onclick="openCategoryModal('${book.id}')" title="Промени категория">📁</button>
-                <button class="btn btn-status" onclick="openStatusModal('${book.id}')" title="Промени статус">📊</button>
                 <button class="btn btn-complete" onclick="toggleBookCompletion('${book.id}')">
                     ${book.completed ? '↩️ Незавършена' : '✓ Завършена'}
                 </button>
@@ -1666,22 +1673,24 @@ function renderCategoryChart() {
     // Count books by category and status
     const mamaTotal = books.filter(b => b.category === 'mama').length;
     const yavorTotal = books.filter(b => b.category === 'yavor').length;
+    const choiceTotal = books.filter(b => b.category === 'choice').length;
     const mamaCompleted = books.filter(b => b.category === 'mama' && b.completed).length;
     const yavorCompleted = books.filter(b => b.category === 'yavor' && b.completed).length;
+    const choiceCompleted = books.filter(b => b.category === 'choice' && b.completed).length;
     
     categoryChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Уговорка с Мама', 'Уговорка с Явор'],
+            labels: ['Уговорка с Мама', 'Уговорка с Явор', 'По желание'],
             datasets: [
                 {
                     label: 'Завършени',
-                    data: [mamaCompleted, yavorCompleted],
+                    data: [mamaCompleted, yavorCompleted, choiceCompleted],
                     backgroundColor: '#28a745'
                 },
                 {
                     label: 'В процес',
-                    data: [mamaTotal - mamaCompleted, yavorTotal - yavorCompleted],
+                    data: [mamaTotal - mamaCompleted, yavorTotal - yavorCompleted, choiceTotal - choiceCompleted],
                     backgroundColor: '#ffc107'
                 }
             ]
