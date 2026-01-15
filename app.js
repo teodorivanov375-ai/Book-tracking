@@ -12,7 +12,7 @@ class Book {
         this.total = total; // total pages or total minutes
         this.category = category; // 'mama', 'yavor', or 'choice'
         this.coverUrl = coverUrl; // book cover image URL
-        this.logs = []; // array of {date, amount, from, to}
+        this.logs = []; // array of {date, amount}
         this.status = 'planned'; // 'planned', 'in-progress', 'completed'
         this.completed = false; // legacy support
     }
@@ -225,9 +225,6 @@ function setupEventListeners() {
     document.getElementById('export-data-btn').addEventListener('click', exportData);
     document.getElementById('import-data-file').addEventListener('change', importData);
 
-    // Setup progress calculation listeners
-    setupProgressCalculation();
-
     // Close modal when clicking outside
     window.addEventListener('click', (e) => {
         if (e.target === logModal) {
@@ -341,40 +338,13 @@ function handleAddLog(e) {
     const book = books.find(b => b.id === bookId);
     if (!book) return;
 
-    let amount, from, to;
+    let amount;
     if (book.type === 'paper') {
-        from = parseInt(document.getElementById('log-page-from').value) || 0;
-        to = parseInt(document.getElementById('log-page-to').value) || 0;
-        
-        if (from <= 0 || to <= 0) {
-            alert('Моля, въведете начална и крайна страница!');
-            return;
-        }
-        if (to < from) {
-            alert('Крайната страница трябва да е по-голяма или равна на началната!');
-            return;
-        }
-        
-        amount = to - from + 1; // +1 защото четем и двете страници включително
+        amount = parseInt(document.getElementById('log-pages').value) || 0;
     } else {
-        const fromHours = parseInt(document.getElementById('log-audio-from-hours').value) || 0;
-        const fromMinutes = parseInt(document.getElementById('log-audio-from-minutes').value) || 0;
-        const toHours = parseInt(document.getElementById('log-audio-to-hours').value) || 0;
-        const toMinutes = parseInt(document.getElementById('log-audio-to-minutes').value) || 0;
-        
-        from = fromHours * 60 + fromMinutes;
-        to = toHours * 60 + toMinutes;
-        
-        if (from < 0 || to <= 0) {
-            alert('Моля, въведете начално и крайно време!');
-            return;
-        }
-        if (to < from) {
-            alert('Крайното време трябва да е по-голямо от началното!');
-            return;
-        }
-        
-        amount = to - from;
+        const hours = parseInt(document.getElementById('log-hours').value) || 0;
+        const minutes = parseInt(document.getElementById('log-minutes').value) || 0;
+        amount = hours * 60 + minutes;
     }
 
     if (amount <= 0) {
@@ -382,7 +352,7 @@ function handleAddLog(e) {
         return;
     }
 
-    book.logs.push({ date, amount, from, to });
+    book.logs.push({ date, amount });
     book.logs.sort((a, b) => new Date(b.date) - new Date(a.date));
     book.updateStatus();
 
@@ -395,13 +365,11 @@ function handleAddLog(e) {
     
     // Add activity
     const unit = book.type === 'paper' ? 'страници' : 'минути';
-    const rangeText = book.type === 'paper' ? `(${from}-${to})` : `(${formatMinutes(from)}-${formatMinutes(to)})`;
-    addActivity('Прогрес', `${amount} ${unit} ${rangeText} за "${book.name}"`, book.name);
+    addActivity('Прогрес', `${amount} ${unit} за "${book.name}"`, book.name);
     checkAchievements();
     
     logModal.style.display = 'none';
     logForm.reset();
-    updateProgressDisplay(book.type);
 }
 
 // Open log modal
@@ -415,19 +383,9 @@ function openLogModal(bookId) {
     if (book.type === 'paper') {
         logPaperField.style.display = 'block';
         logAudioField.style.display = 'none';
-        // Clear paper fields
-        document.getElementById('log-page-from').value = '';
-        document.getElementById('log-page-to').value = '';
-        updateProgressDisplay('paper');
     } else {
         logPaperField.style.display = 'none';
         logAudioField.style.display = 'block';
-        // Clear audio fields
-        document.getElementById('log-audio-from-hours').value = '0';
-        document.getElementById('log-audio-from-minutes').value = '0';
-        document.getElementById('log-audio-to-hours').value = '0';
-        document.getElementById('log-audio-to-minutes').value = '0';
-        updateProgressDisplay('audio');
     }
 
     logModal.style.display = 'block';
@@ -457,31 +415,19 @@ function openLogsModal(bookId) {
             });
 
             let amountText;
-            let rangeText = '';
             if (book.type === 'paper') {
                 amountText = `${log.amount} страници`;
-                if (log.from && log.to) {
-                    rangeText = ` (стр. ${log.from}-${log.to})`;
-                }
             } else {
                 const hours = Math.floor(log.amount / 60);
                 const minutes = log.amount % 60;
                 amountText = hours > 0 ? `${hours}ч ${minutes}мин` : `${minutes}мин`;
-                if (log.from !== undefined && log.to !== undefined) {
-                    rangeText = ` (${formatMinutes(log.from)}-${formatMinutes(log.to)})`;
-                }
             }
 
             logEntry.innerHTML = `
                 <span class="log-date">${dateFormatted}</span>
-                <span class="log-amount">${amountText}<span class="log-range">${rangeText}</span></span>
-                <button class="delete-log-btn" data-book-id="${bookId}" data-log-index="${index}" title="Изтрий">🗑️</button>
+                <span class="log-amount">${amountText}</span>
+                <button class="delete-log-btn" onclick="deleteLog('${bookId}', ${index})" title="Изтрий">🗑️</button>
             `;
-            
-            // Add event listener to delete button
-            const deleteBtn = logEntry.querySelector('.delete-log-btn');
-            deleteBtn.addEventListener('click', () => deleteLog(bookId, index));
-            
             logsList.appendChild(logEntry);
         });
     }
@@ -800,12 +746,12 @@ function createBookCard(book) {
                 </div>
             </div>
             <div class="book-actions">
-                <button class="btn btn-success" data-action="log" data-book-id="${book.id}">+ Прогрес</button>
-                <button class="btn btn-info" data-action="edit" data-book-id="${book.id}" title="Редактирай">✏️</button>
-                <button class="btn btn-complete" data-action="complete" data-book-id="${book.id}">
+                <button class="btn btn-success" onclick="openLogModal('${book.id}')">+ Прогрес</button>
+                <button class="btn btn-info" onclick="openEditModal('${book.id}')" title="Редактирай">✏️</button>
+                <button class="btn btn-complete" onclick="toggleBookCompletion('${book.id}')">
                     ${book.completed ? '↩️ Незавършена' : '✓ Завършена'}
                 </button>
-                <button class="btn btn-danger" data-action="delete" data-book-id="${book.id}">✕</button>
+                <button class="btn btn-danger" onclick="deleteBook('${book.id}')">✕</button>
             </div>
         </div>
 
@@ -823,17 +769,10 @@ function createBookCard(book) {
             </div>
         </div>
 
-        <div class="logs-summary" data-action="logs" data-book-id="${book.id}">
+        <div class="logs-summary" onclick="openLogsModal('${book.id}')">
             <span>📊 История на прогреса (${book.logs.length} записа) - Кликни за детайли</span>
         </div>
     `;
-
-    // Add event listeners
-    card.querySelector('[data-action="log"]').addEventListener('click', () => openLogModal(book.id));
-    card.querySelector('[data-action="edit"]').addEventListener('click', () => openEditModal(book.id));
-    card.querySelector('[data-action="complete"]').addEventListener('click', () => toggleBookCompletion(book.id));
-    card.querySelector('[data-action="delete"]').addEventListener('click', () => deleteBook(book.id));
-    card.querySelector('[data-action="logs"]').addEventListener('click', () => openLogsModal(book.id));
 
     return card;
 }
@@ -1208,34 +1147,17 @@ function openSuggestionsManager(type) {
     
     list.innerHTML = allSuggestions.map(suggestion => {
         const isHidden = hidden.includes(suggestion);
+        const escapedSuggestion = suggestion.replace(/'/g, "\\'");
         return `
             <div class="suggestion-item">
                 <span>${suggestion}</span>
                 <button class="btn-small ${isHidden ? 'btn-show' : 'btn-hide'}" 
-                        data-action="${isHidden ? 'show' : 'hide'}"
-                        data-type="${type}"
-                        data-suggestion="${suggestion}">
+                        onclick="${isHidden ? 'showSuggestion' : 'hideSuggestion'}('${type}', '${escapedSuggestion}'); openSuggestionsManager('${type}')">
                     ${isHidden ? '👁️ Покажи' : '🚫 Скрий'}
                 </button>
             </div>
         `;
     }).join('');
-    
-    // Add event listeners to all buttons
-    list.querySelectorAll('.btn-small').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const action = e.target.dataset.action;
-            const type = e.target.dataset.type;
-            const suggestion = e.target.dataset.suggestion;
-            
-            if (action === 'show') {
-                showSuggestion(type, suggestion);
-            } else {
-                hideSuggestion(type, suggestion);
-            }
-            openSuggestionsManager(type);
-        });
-    });
     
     modal.style.display = 'flex';
 }
@@ -1791,79 +1713,4 @@ function renderCategoryChart() {
             }
         }
     });
-}
-
-// Format minutes to hours and minutes display
-function formatMinutes(totalMinutes) {
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    if (hours > 0) {
-        return `${hours}ч ${minutes}мин`;
-    }
-    return `${minutes}мин`;
-}
-
-// Update progress display when user inputs from/to values
-function updateProgressDisplay(bookType) {
-    if (bookType === 'paper') {
-        const fromPage = parseInt(document.getElementById('log-page-from').value) || 0;
-        const toPage = parseInt(document.getElementById('log-page-to').value) || 0;
-        const display = document.getElementById('paper-progress-display');
-        
-        if (fromPage > 0 && toPage > 0 && toPage >= fromPage) {
-            const pages = toPage - fromPage + 1;
-            display.textContent = `📖 Ще прочетете: ${pages} страници`;
-            display.style.color = '#28a745';
-        } else if (fromPage > 0 || toPage > 0) {
-            display.textContent = '⚠️ Моля, въведете валиден диапазон';
-            display.style.color = '#dc3545';
-        } else {
-            display.textContent = '';
-        }
-    } else {
-        const fromHours = parseInt(document.getElementById('log-audio-from-hours').value) || 0;
-        const fromMinutes = parseInt(document.getElementById('log-audio-from-minutes').value) || 0;
-        const toHours = parseInt(document.getElementById('log-audio-to-hours').value) || 0;
-        const toMinutes = parseInt(document.getElementById('log-audio-to-minutes').value) || 0;
-        const display = document.getElementById('audio-progress-display');
-        
-        const fromTotal = fromHours * 60 + fromMinutes;
-        const toTotal = toHours * 60 + toMinutes;
-        
-        if (fromTotal >= 0 && toTotal > 0 && toTotal >= fromTotal) {
-            const duration = toTotal - fromTotal;
-            display.textContent = `🎧 Ще изслушате: ${formatMinutes(duration)}`;
-            display.style.color = '#28a745';
-        } else if (fromTotal > 0 || toTotal > 0) {
-            display.textContent = '⚠️ Моля, въведете валиден диапазон';
-            display.style.color = '#dc3545';
-        } else {
-            display.textContent = '';
-        }
-    }
-}
-
-// Setup event listeners for auto-calculation
-function setupProgressCalculation() {
-    // Paper book inputs
-    const pageFrom = document.getElementById('log-page-from');
-    const pageTo = document.getElementById('log-page-to');
-    
-    if (pageFrom && pageTo) {
-        pageFrom.addEventListener('input', () => updateProgressDisplay('paper'));
-        pageTo.addEventListener('input', () => updateProgressDisplay('paper'));
-    }
-    
-    // Audio book inputs
-    const audioFromHours = document.getElementById('log-audio-from-hours');
-    const audioFromMinutes = document.getElementById('log-audio-from-minutes');
-    const audioToHours = document.getElementById('log-audio-to-hours');
-    const audioToMinutes = document.getElementById('log-audio-to-minutes');
-    
-    if (audioFromHours && audioFromMinutes && audioToHours && audioToMinutes) {
-        audioFromHours.addEventListener('input', () => updateProgressDisplay('audio'));
-        audioFromMinutes.addEventListener('input', () => updateProgressDisplay('audio'));
-        audioToHours.addEventListener('input', () => updateProgressDisplay('audio'));
-        audioToMinutes.addEventListener('input', () => updateProgressDisplay('audio'));
-    }
 }
