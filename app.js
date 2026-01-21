@@ -191,23 +191,32 @@ function setupEventListeners() {
     });
 
     // Edit modal
+    const editBookForm = document.getElementById('edit-book-form');
     if (editBookForm) {
         editBookForm.addEventListener('submit', handleEditBook);
     }
     
-    document.getElementById('cancel-edit').addEventListener('click', () => {
-        editModal.style.display = 'none';
-    });
+    const cancelEditBtn = document.getElementById('cancel-edit');
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', () => {
+            const editModal = document.getElementById('edit-modal');
+            if (editModal) {
+                editModal.style.display = 'none';
+            }
+        });
+    }
     
     // Toggle between paper and audio fields in edit modal
     document.querySelectorAll('input[name="edit-book-type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
+            const editPaperFields = document.getElementById('edit-paper-fields');
+            const editAudioFields = document.getElementById('edit-audio-fields');
             if (e.target.value === 'paper') {
-                editPaperFields.style.display = 'block';
-                editAudioFields.style.display = 'none';
+                if (editPaperFields) editPaperFields.style.display = 'block';
+                if (editAudioFields) editAudioFields.style.display = 'none';
             } else {
-                editPaperFields.style.display = 'none';
-                editAudioFields.style.display = 'block';
+                if (editPaperFields) editPaperFields.style.display = 'none';
+                if (editAudioFields) editAudioFields.style.display = 'block';
             }
         });
     });
@@ -233,8 +242,9 @@ function setupEventListeners() {
         if (e.target === logsModal) {
             logsModal.style.display = 'none';
         }
+        const editModal = document.getElementById('edit-modal');
         if (e.target === editModal) {
-            editModal.style.display = 'none';
+            if (editModal) editModal.style.display = 'none';
         }
         const categoryModal = document.getElementById('category-modal');
         if (e.target === categoryModal) {
@@ -426,8 +436,12 @@ function openLogsModal(bookId) {
             logEntry.innerHTML = `
                 <span class="log-date">${dateFormatted}</span>
                 <span class="log-amount">${amountText}</span>
-                <button class="delete-log-btn" onclick="deleteLog('${bookId}', ${index})" title="Изтрий">🗑️</button>
+                <button class="delete-log-btn" data-book-id="${bookId}" data-log-index="${index}" title="Изтрий">🗑️</button>
             `;
+            
+            logEntry.querySelector('.delete-log-btn').addEventListener('click', function() {
+                deleteLog(this.dataset.bookId, parseInt(this.dataset.logIndex));
+            });
             logsList.appendChild(logEntry);
         });
     }
@@ -540,6 +554,13 @@ function deleteBook(bookId) {
         renderBooks();
         renderStatistics();
     }
+}
+
+// Helper function to escape HTML attributes
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Natural sort function for book names with numbers
@@ -733,25 +754,30 @@ function createBookCard(book) {
         remainingText = remainingHours > 0 ? `${remainingHours}ч ${remainingMinutes}мин остават` : `${remainingMinutes}мин остават`;
     }
 
+    card.setAttribute('data-book-id', book.id);
+    
+    const escapedName = escapeHtml(book.name);
+    const escapedAuthor = escapeHtml(book.author);
+    
     card.innerHTML = `
         <div class="book-header">
             <div class="book-info">
-                ${book.coverUrl ? `<div class="book-cover-small"><img src="${book.coverUrl}" alt="${book.name}" onerror="this.style.display='none'"></div>` : ''}
+                ${book.coverUrl ? `<div class="book-cover-small"><img src="${escapeHtml(book.coverUrl)}" alt="${escapedName}" onerror="this.style.display='none'"></div>` : ''}
                 <div>
-                    <h3>${book.name}</h3>
-                    <div class="author">от ${book.author}</div>
+                    <h3>${escapedName}</h3>
+                    <div class="author">от ${escapedAuthor}</div>
                     <span class="type-badge ${book.type}">
                         ${book.type === 'paper' ? '📖 Хартиена' : '🎧 Аудио'} • ${totalText}
                     </span>
                 </div>
             </div>
             <div class="book-actions">
-                <button class="btn btn-success" onclick="openLogModal('${book.id}')">+ Прогрес</button>
-                <button class="btn btn-info" onclick="openEditModal('${book.id}')" title="Редактирай">✏️</button>
-                <button class="btn btn-complete" onclick="toggleBookCompletion('${book.id}')">
+                <button class="btn btn-success btn-log">+ Прогрес</button>
+                <button class="btn btn-info btn-edit" title="Редактирай">✏️</button>
+                <button class="btn btn-complete btn-complete-toggle">
                     ${book.completed ? '↩️ Незавършена' : '✓ Завършена'}
                 </button>
-                <button class="btn btn-danger" onclick="deleteBook('${book.id}')">✕</button>
+                <button class="btn btn-danger btn-delete">✕</button>
             </div>
         </div>
 
@@ -769,10 +795,18 @@ function createBookCard(book) {
             </div>
         </div>
 
-        <div class="logs-summary" onclick="openLogsModal('${book.id}')">
+        <div class="logs-summary">
             <span>📊 История на прогреса (${book.logs.length} записа) - Кликни за детайли</span>
         </div>
     `;
+    
+    // Add event listeners
+    const bookId = book.id;
+    card.querySelector('.btn-log').addEventListener('click', () => openLogModal(bookId));
+    card.querySelector('.btn-edit').addEventListener('click', () => openEditModal(bookId));
+    card.querySelector('.btn-complete-toggle').addEventListener('click', () => toggleBookCompletion(bookId));
+    card.querySelector('.btn-delete').addEventListener('click', () => deleteBook(bookId));
+    card.querySelector('.logs-summary').addEventListener('click', () => openLogsModal(bookId));
 
     return card;
 }
@@ -1145,19 +1179,31 @@ function openSuggestionsManager(type) {
     const allSuggestions = [...new Set(books.map(b => type === 'name' ? b.name : b.author))].sort();
     const hidden = type === 'name' ? hiddenSuggestions.names : hiddenSuggestions.authors;
     
-    list.innerHTML = allSuggestions.map(suggestion => {
+    list.innerHTML = '';
+    
+    allSuggestions.forEach(suggestion => {
         const isHidden = hidden.includes(suggestion);
-        const escapedSuggestion = suggestion.replace(/'/g, "\\'");
-        return `
-            <div class="suggestion-item">
-                <span>${suggestion}</span>
-                <button class="btn-small ${isHidden ? 'btn-show' : 'btn-hide'}" 
-                        onclick="${isHidden ? 'showSuggestion' : 'hideSuggestion'}('${type}', '${escapedSuggestion}'); openSuggestionsManager('${type}')">
-                    ${isHidden ? '👁️ Покажи' : '🚫 Скрий'}
-                </button>
-            </div>
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.innerHTML = `
+            <span>${suggestion}</span>
+            <button class="btn-small ${isHidden ? 'btn-show' : 'btn-hide'}">
+                ${isHidden ? '👁️ Покажи' : '🚫 Скрий'}
+            </button>
         `;
-    }).join('');
+        
+        const btn = div.querySelector('button');
+        btn.addEventListener('click', () => {
+            if (isHidden) {
+                showSuggestion(type, suggestion);
+            } else {
+                hideSuggestion(type, suggestion);
+            }
+            openSuggestionsManager(type);
+        });
+        
+        list.appendChild(div);
+    });
     
     modal.style.display = 'flex';
 }
@@ -1709,6 +1755,9 @@ function renderCategoryChart() {
                 x: {
                     stacked: true
                 },
+                y: {
+                    stacked: true,
+                    beginAtZero: true
                 }
             }
         }
