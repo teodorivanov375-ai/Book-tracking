@@ -57,7 +57,7 @@ let dailyGoal = 50; // pages per day
 let theme = 'light';
 let currentCategoryFilter = 'mama'; // Track current category filter
 let hiddenSuggestions = { names: [], authors: [] }; // Hidden autocomplete suggestions
-let accentColor = '#52b788'; // Default accent color
+let accentColor = { light: '#52b788', dark: '#2d6a4f' }; // Accent colors for both themes
 let viewMode = 'list'; // 'list' or 'shelf'
 
 // ========================
@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     initializeAchievements();
     updateAutocomplete(); // Update autocomplete lists
+    updateColorPickerDisplay();
     // Set default filter to 'mama'
     filterBooksByCategory('mama');
 });
@@ -244,13 +245,15 @@ function setupEventListeners() {
     if (colorPickerToggle && colorPickerPanel) {
         colorPickerToggle.addEventListener('click', () => {
             colorPickerPanel.style.display = colorPickerPanel.style.display === 'none' ? 'grid' : 'none';
+            updateColorPickerDisplay();
         });
 
         // Color options
         document.querySelectorAll('.color-option').forEach(option => {
             option.addEventListener('click', () => {
-                const color = option.dataset.color;
-                setAccentColor(color);
+                const lightColor = option.dataset.colorLight;
+                const darkColor = option.dataset.colorDark;
+                setAccentColor({ light: lightColor, dark: darkColor });
                 colorPickerPanel.style.display = 'none';
             });
         });
@@ -1347,6 +1350,9 @@ function toggleTheme() {
         themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
     }
     localStorage.setItem('theme', theme);
+    
+    // Apply current accent color for new theme
+    applyAccentColor();
 }
 
 function loadTheme() {
@@ -1365,26 +1371,61 @@ function loadTheme() {
 // ACCENT COLOR MANAGEMENT
 // ========================
 
-function setAccentColor(color) {
-    accentColor = color;
-    document.documentElement.style.setProperty('--accent-color', color);
-    document.documentElement.style.setProperty('--bg-primary', color);
-    localStorage.setItem('accentColor', color);
+function setAccentColor(colors) {
+    accentColor = colors;
+    applyAccentColor();
+    localStorage.setItem('accentColor', JSON.stringify(colors));
     
     // Update active state on color options
     document.querySelectorAll('.color-option').forEach(opt => {
         opt.classList.remove('active');
-        if (opt.dataset.color === color) {
+        if (opt.dataset.colorLight === colors.light && opt.dataset.colorDark === colors.dark) {
             opt.classList.add('active');
         }
     });
 }
 
+function applyAccentColor() {
+    const currentColor = theme === 'dark' ? accentColor.dark : accentColor.light;
+    document.documentElement.style.setProperty('--accent-color', currentColor);
+    document.documentElement.style.setProperty('--bg-primary', currentColor);
+}
+
 function loadAccentColor() {
     const saved = localStorage.getItem('accentColor');
     if (saved) {
-        setAccentColor(saved);
+        try {
+            const parsed = JSON.parse(saved);
+            // Check if it's the new format (object with light/dark)
+            if (parsed && typeof parsed === 'object' && parsed.light && parsed.dark) {
+                accentColor = parsed;
+            } else {
+                // Old format or invalid, reset to default
+                accentColor = { light: '#52b788', dark: '#2d6a4f' };
+            }
+        } catch (e) {
+            // If old string format, convert to new format
+            accentColor = { light: saved, dark: '#2d6a4f' };
+        }
     }
+    applyAccentColor();
+}
+
+function updateColorPickerDisplay() {
+    // Update color preview based on current theme
+    document.querySelectorAll('.color-option').forEach(opt => {
+        const color = theme === 'dark' ? opt.dataset.colorDark : opt.dataset.colorLight;
+        if (color) {
+            opt.style.background = color;
+        }
+        
+        // Set active state
+        if (accentColor && opt.dataset.colorLight === accentColor.light && opt.dataset.colorDark === accentColor.dark) {
+            opt.classList.add('active');
+        } else {
+            opt.classList.remove('active');
+        }
+    });
 }
 
 // ========================
