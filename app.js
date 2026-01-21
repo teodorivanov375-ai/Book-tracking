@@ -57,6 +57,8 @@ let dailyGoal = 50; // pages per day
 let theme = 'light';
 let currentCategoryFilter = 'mama'; // Track current category filter
 let hiddenSuggestions = { names: [], authors: [] }; // Hidden autocomplete suggestions
+let accentColor = '#52b788'; // Default accent color
+let viewMode = 'list'; // 'list' or 'shelf'
 
 // ========================
 // DOM ELEMENTS
@@ -79,6 +81,8 @@ const logAudioField = document.getElementById('log-audio-field');
 
 document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
+    loadAccentColor();
+    loadViewMode();
     loadBooks();
     loadStreaks();
     loadActivityFeed();
@@ -233,6 +237,50 @@ function setupEventListeners() {
     // Export/Import buttons
     document.getElementById('export-data-btn').addEventListener('click', exportData);
     document.getElementById('import-data-file').addEventListener('change', importData);
+
+    // Color picker toggle
+    const colorPickerToggle = document.getElementById('color-picker-toggle');
+    const colorPickerPanel = document.getElementById('color-picker-panel');
+    if (colorPickerToggle && colorPickerPanel) {
+        colorPickerToggle.addEventListener('click', () => {
+            colorPickerPanel.style.display = colorPickerPanel.style.display === 'none' ? 'grid' : 'none';
+        });
+
+        // Color options
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const color = option.dataset.color;
+                setAccentColor(color);
+                colorPickerPanel.style.display = 'none';
+            });
+        });
+    }
+
+    // View toggle
+    const viewToggle = document.getElementById('view-toggle');
+    if (viewToggle) {
+        viewToggle.addEventListener('click', toggleViewMode);
+    }
+    
+    // Manage suggestions buttons
+    document.querySelectorAll('.manage-suggestions-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const type = this.dataset.type;
+            openSuggestionsManager(type);
+        });
+    });
+    
+    // Close suggestions manager
+    const closeSuggestionsBtn = document.getElementById('close-suggestions-btn');
+    if (closeSuggestionsBtn) {
+        closeSuggestionsBtn.addEventListener('click', closeSuggestionsManager);
+    }
+    
+    // Cancel status button
+    const cancelStatusBtn = document.getElementById('cancel-status-btn');
+    if (cancelStatusBtn) {
+        cancelStatusBtn.addEventListener('click', closeStatusModal);
+    }
 
     // Close modal when clicking outside
     window.addEventListener('click', (e) => {
@@ -526,6 +574,9 @@ function toggleBookCompletion(bookId) {
         }
         addActivity('Завършване', `Завършена книга "${book.name}"`, book.name);
         book.completed = true;
+        
+        // Celebrate with confetti
+        createConfetti();
     } else {
         // If unmarking as completed, remove ALL auto-added logs
         book.logs = book.logs.filter(log => !log.autoAdded);
@@ -730,7 +781,23 @@ function getProgressGradient(percentage) {
 function createBookCard(book) {
     const card = document.createElement('div');
     card.className = `book-card ${book.completed ? 'completed' : ''}`;
+    card.setAttribute('data-book-id', book.id);
 
+    const escapedName = escapeHtml(book.name);
+    const escapedAuthor = escapeHtml(book.author);
+    
+    // Shelf view - simplified spine representation
+    if (viewMode === 'shelf') {
+        card.innerHTML = `
+            <div class="book-spine">
+                <h3>${escapedName}</h3>
+                <div class="author">${escapedAuthor}</div>
+            </div>
+        `;
+        return card;
+    }
+    
+    // Regular list view
     const progress = book.getTotalProgress();
     const percentage = book.getProgressPercentage();
     const remaining = book.getRemainingAmount();
@@ -753,11 +820,6 @@ function createBookCard(book) {
         const remainingMinutes = remaining % 60;
         remainingText = remainingHours > 0 ? `${remainingHours}ч ${remainingMinutes}мин остават` : `${remainingMinutes}мин остават`;
     }
-
-    card.setAttribute('data-book-id', book.id);
-    
-    const escapedName = escapeHtml(book.name);
-    const escapedAuthor = escapeHtml(book.author);
     
     card.innerHTML = `
         <div class="book-header">
@@ -1300,6 +1362,89 @@ function loadTheme() {
 }
 
 // ========================
+// ACCENT COLOR MANAGEMENT
+// ========================
+
+function setAccentColor(color) {
+    accentColor = color;
+    document.documentElement.style.setProperty('--accent-color', color);
+    document.documentElement.style.setProperty('--bg-primary', color);
+    localStorage.setItem('accentColor', color);
+    
+    // Update active state on color options
+    document.querySelectorAll('.color-option').forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.dataset.color === color) {
+            opt.classList.add('active');
+        }
+    });
+}
+
+function loadAccentColor() {
+    const saved = localStorage.getItem('accentColor');
+    if (saved) {
+        setAccentColor(saved);
+    }
+}
+
+// ========================
+// VIEW MODE MANAGEMENT
+// ========================
+
+function toggleViewMode() {
+    viewMode = viewMode === 'list' ? 'shelf' : 'list';
+    applyViewMode();
+    localStorage.setItem('viewMode', viewMode);
+}
+
+function applyViewMode() {
+    const booksList = document.getElementById('books-list');
+    const viewToggle = document.getElementById('view-toggle');
+    const viewIcon = viewToggle?.querySelector('.view-icon');
+    
+    if (booksList) {
+        booksList.className = viewMode === 'shelf' ? 'shelf-view' : '';
+    }
+    
+    if (viewIcon) {
+        viewIcon.textContent = viewMode === 'list' ? '📚' : '📋';
+    }
+    
+    // Re-render books to apply proper structure for shelf view
+    renderBooks();
+}
+
+function loadViewMode() {
+    const saved = localStorage.getItem('viewMode');
+    if (saved) {
+        viewMode = saved;
+        applyViewMode();
+    }
+}
+
+// ========================
+// VISUAL EFFECTS
+// ========================
+
+function createConfetti() {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7dc6f', '#bb8fce', '#52b788'];
+    const confettiCount = 50;
+    
+    for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.3 + 's';
+        confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(confetti);
+        
+        // Remove after animation
+        setTimeout(() => confetti.remove(), 3000);
+    }
+}
+
+// ========================
 // ACTIVITY FEED
 // ========================
 
@@ -1401,6 +1546,8 @@ function checkAchievements() {
             userAch.unlocked = true;
             updated = true;
             addActivity('Постижение', `Отключено: ${achievement.name}`, '');
+            // Celebrate achievement
+            createConfetti();
         }
     });
     if (updated) {
@@ -1417,7 +1564,7 @@ function renderAchievements() {
         const userAch = achievements.find(a => a.id === achievement.id);
         const unlocked = userAch ? userAch.unlocked : false;
         return `
-            <div class="achievement-card ${unlocked ? '' : 'locked'}">
+            <div class="achievement-card ${unlocked ? 'achievement-unlocked' : 'locked'}">
                 <div class="achievement-icon">${achievement.icon}</div>
                 <div class="achievement-name">${achievement.name}</div>
                 <div class="achievement-desc">${achievement.desc}</div>

@@ -11,7 +11,20 @@
     <div class="container">
         <header>
             <h1>Моите книги</h1>
-            <button id="theme-toggle" class="theme-toggle" title="Смени темата">🌙</button>
+            <div class="header-controls">
+                <button id="theme-toggle" class="theme-toggle" title="Смени темата">🌙</button>
+                <button id="color-picker-toggle" class="color-picker-toggle" title="Избери акцентен цвят">🎨</button>
+                <div id="color-picker-panel" class="color-picker-panel" style="display: none;">
+                    <div class="color-option" data-color="#52b788" style="background: #52b788;"></div>
+                    <div class="color-option" data-color="#3a86ff" style="background: #3a86ff;"></div>
+                    <div class="color-option" data-color="#8338ec" style="background: #8338ec;"></div>
+                    <div class="color-option" data-color="#ff006e" style="background: #ff006e;"></div>
+                    <div class="color-option" data-color="#fb5607" style="background: #fb5607;"></div>
+                    <div class="color-option" data-color="#06d6a0" style="background: #06d6a0;"></div>
+                    <div class="color-option" data-color="#e63946" style="background: #e63946;"></div>
+                    <div class="color-option" data-color="#ffbe0b" style="background: #ffbe0b;"></div>
+                </div>
+            </div>
         </header>
 
         <!-- Tab Navigation -->
@@ -31,7 +44,7 @@
                 <div class="form-group">
                     <label for="book-name">
                         Име на книга:
-                        <button type="button" class="manage-suggestions-btn" onclick="openSuggestionsManager('name')" title="Управление на предложения">⚙️</button>
+                        <button type="button" class="manage-suggestions-btn" data-type="name" title="Управление на предложения">⚙️</button>
                     </label>
                     <input type="text" id="book-name" list="book-names-list" required autocomplete="off">
                     <datalist id="book-names-list"></datalist>
@@ -40,7 +53,7 @@
                 <div class="form-group">
                     <label for="book-author">
                         Автор:
-                        <button type="button" class="manage-suggestions-btn" onclick="openSuggestionsManager('author')" title="Управление на предложения">⚙️</button>
+                        <button type="button" class="manage-suggestions-btn" data-type="author" title="Управление на предложения">⚙️</button>
                     </label>
                     <input type="text" id="book-author" list="authors-list" required autocomplete="off">
                     <datalist id="authors-list"></datalist>
@@ -108,7 +121,14 @@
 
         <!-- Books list -->
         <div class="tab-content books-section" id="book-list" style="display: none;">
-            <h2>Списък с книги</h2>
+            <div class="books-header">
+                <h2>Списък с книги</h2>
+                <div class="view-controls">
+                    <button id="view-toggle" class="view-toggle" title="Смени изглед">
+                        <span class="view-icon">📚</span>
+                    </button>
+                </div>
+            </div>
             
             <!-- Category filter -->
             <div class="filter-container">
@@ -383,7 +403,7 @@
         <div class="modal-content">
             <h3 id="suggestions-modal-title">Управление на предложения</h3>
             <div id="suggestions-list"></div>
-            <button type="button" class="btn btn-secondary" onclick="closeSuggestionsManager()">Затвори</button>
+            <button type="button" class="btn btn-secondary" id="close-suggestions-btn">Затвори</button>
         </div>
     </div>
 
@@ -406,7 +426,7 @@
                     <span>Завършена</span>
                 </button>
             </div>
-            <button type="button" class="btn btn-secondary" onclick="closeStatusModal()">Отказ</button>
+            <button type="button" class="btn btn-secondary" id="cancel-status-btn">Отказ</button>
         </div>
     </div>
 
