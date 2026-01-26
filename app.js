@@ -1373,6 +1373,33 @@ function loadTheme() {
 // ACCENT COLOR MANAGEMENT
 // ========================
 
+// Helper function to convert hex to RGB
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
+// Helper function to adjust brightness of a hex color
+function adjustBrightness(hex, percent) {
+    const rgb = hexToRgb(hex);
+    if (!rgb) return hex;
+    
+    const adjust = (value) => {
+        const adjusted = Math.round(value + (value * percent / 100));
+        return Math.max(0, Math.min(255, adjusted));
+    };
+    
+    const r = adjust(rgb.r).toString(16).padStart(2, '0');
+    const g = adjust(rgb.g).toString(16).padStart(2, '0');
+    const b = adjust(rgb.b).toString(16).padStart(2, '0');
+    
+    return `#${r}${g}${b}`;
+}
+
 function setAccentColor(colors) {
     accentColor = colors;
     applyAccentColor();
