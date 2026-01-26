@@ -1231,7 +1231,7 @@ body.dark-mode .log-entry {
 
 /* Statistics Tab Styles */
 .statistics-container {
-    background: white;
+    background: white !important;
     border-radius: 15px;
     padding: 30px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
@@ -1239,7 +1239,7 @@ body.dark-mode .log-entry {
 
 .statistics-container h2 {
     margin-bottom: 30px;
-    color: #333;
+    color: #333 !important;
     text-align: center;
     font-size: 2em;
 }
@@ -1250,7 +1250,7 @@ body.dark-mode .log-entry {
 
 .stats-section h3 {
     font-size: 1.3em;
-    color: #333;
+    color: #333 !important;
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #e0e0e0;
@@ -1416,7 +1416,7 @@ body.dark-mode .log-entry {
 }
 
 .stat-box {
-    background: var(--card-bg);
+    background: white !important;
     padding: 25px;
     border-radius: 15px;
     text-align: center;
@@ -1466,7 +1466,7 @@ body.dark-mode .log-entry {
 /* Activity Feed */
 .activity-container,
 .achievements-container {
-    background: var(--card-bg);
+    background: white !important;
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 5px 20px var(--shadow);
@@ -1509,7 +1509,7 @@ body.dark-mode .log-entry {
 }
 
 .achievement-card {
-    background: var(--card-bg);
+    background: white !important;
     padding: 20px;
     border-radius: 15px;
     text-align: center;
