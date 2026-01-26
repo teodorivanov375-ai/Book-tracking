@@ -1417,19 +1417,17 @@ function setAccentColor(colors) {
 function applyAccentColor() {
     const currentColor = theme === 'dark' ? accentColor.dark : accentColor.light;
     console.log('Applying accent color:', currentColor, 'Theme:', theme);
+    
+    // Променяме само основния фон и акцентния цвят
     document.documentElement.style.setProperty('--accent-color', currentColor);
     document.documentElement.style.setProperty('--bg-primary', currentColor);
     
-    // Update dark mode CSS variables when in dark mode
+    // В тъмен режим не променяме цветовете на картите и менютата
+    // Оставяме ги с оригиналните тъмни цветове от CSS
     if (theme === 'dark') {
-        // Create complementary colors for dark mode based on the accent color
-        const rgb = hexToRgb(accentColor.dark);
-        const lighterBg = adjustBrightness(accentColor.dark, 20);
-        const cardBg = adjustBrightness(accentColor.dark, -30);
-        
-        console.log('Dark mode colors - Secondary:', lighterBg, 'Card:', cardBg);
-        document.documentElement.style.setProperty('--bg-secondary', lighterBg);
-        document.documentElement.style.setProperty('--card-bg', cardBg);
+        // Нулираме промените, за да се използват оригиналните CSS стойности
+        document.documentElement.style.removeProperty('--bg-secondary');
+        document.documentElement.style.removeProperty('--card-bg');
     }
 }
 

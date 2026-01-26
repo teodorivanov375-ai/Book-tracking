@@ -15,7 +15,9 @@
 }
 
 body.dark-mode {
-            --text-primary: #eee;
+    --bg-secondary: #16213e;
+    --card-bg: #0f3460;
+    --text-primary: #eee;
     --text-secondary: #aaa;
     --shadow: rgba(0, 0, 0, 0.5);
 }
