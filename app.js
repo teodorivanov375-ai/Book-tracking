@@ -81,8 +81,8 @@ const logAudioField = document.getElementById('log-audio-field');
 
 document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
-    loadAccentColor();
     loadViewMode();
+    loadAccentColor();
     loadBooks();
     loadStreaks();
     loadActivityFeed();
@@ -1365,6 +1365,8 @@ function loadTheme() {
             if (themeToggle) themeToggle.textContent = '☀️';
         }
     }
+    // Apply accent color after theme is loaded
+    applyAccentColor();
 }
 
 // ========================
@@ -1387,8 +1389,21 @@ function setAccentColor(colors) {
 
 function applyAccentColor() {
     const currentColor = theme === 'dark' ? accentColor.dark : accentColor.light;
+    console.log('Applying accent color:', currentColor, 'Theme:', theme);
     document.documentElement.style.setProperty('--accent-color', currentColor);
     document.documentElement.style.setProperty('--bg-primary', currentColor);
+    
+    // Update dark mode CSS variables when in dark mode
+    if (theme === 'dark') {
+        // Create complementary colors for dark mode based on the accent color
+        const rgb = hexToRgb(accentColor.dark);
+        const lighterBg = adjustBrightness(accentColor.dark, 20);
+        const cardBg = adjustBrightness(accentColor.dark, -30);
+        
+        console.log('Dark mode colors - Secondary:', lighterBg, 'Card:', cardBg);
+        document.documentElement.style.setProperty('--bg-secondary', lighterBg);
+        document.documentElement.style.setProperty('--card-bg', cardBg);
+    }
 }
 
 function loadAccentColor() {
