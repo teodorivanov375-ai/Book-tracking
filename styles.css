@@ -1239,7 +1239,7 @@ body.dark-mode .log-entry {
 
 .statistics-container h2 {
     margin-bottom: 30px;
-    color: #333 !important;
+    color: #000 !important;
     text-align: center;
     font-size: 2em;
 }
@@ -1250,7 +1250,7 @@ body.dark-mode .log-entry {
 
 .stats-section h3 {
     font-size: 1.3em;
-    color: #333 !important;
+    color: #000 !important;
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #e0e0e0;
@@ -1426,7 +1426,7 @@ body.dark-mode .log-entry {
 .stat-number {
     font-size: 2.5em;
     font-weight: bold;
-    color: #333;
+    color: #000 !important;
     margin-bottom: 10px;
 }
 
@@ -1487,18 +1487,18 @@ body.dark-mode .log-entry {
 
 .activity-type {
     font-weight: 600;
-    color: #333;
+    color: #000 !important;
     margin-bottom: 5px;
 }
 
 .activity-message {
-    color: var(--text-primary);
+    color: #000 !important;
     margin-bottom: 5px;
 }
 
 .activity-date {
     font-size: 0.85em;
-    color: var(--text-secondary);
+    color: #000 !important;
 }
 
 /* Achievements */
@@ -1534,13 +1534,13 @@ body.dark-mode .log-entry {
 
 .achievement-name {
     font-weight: 600;
-    color: var(--text-primary);
+    color: #000 !important;
     margin-bottom: 5px;
 }
 
 .achievement-desc {
     font-size: 0.85em;
-    color: var(--text-secondary);
+    color: #000 !important;
 }
 
 /* Export/Import Section */
@@ -1776,4 +1776,338 @@ body.dark-mode .log-entry {
     50% {
         transform: scale(1.05);
     }
+}
+
+/* ========================
+   PROJECT STYLES
+   ======================== */
+
+/* Project Card */
+.project-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 20px var(--shadow);
+    transition: all 0.3s;
+    border-left: 5px solid var(--accent-color);
+    animation: slideIn 0.3s ease-out;
+    position: relative;
+}
+
+.project-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px var(--shadow);
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+.project-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.project-icon {
+    font-size: 2.5em;
+    line-height: 1;
+}
+
+.project-info h3 {
+    margin: 0 0 5px 0;
+    color: var(--text-primary);
+    font-size: 1.3em;
+}
+
+.project-dates {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin: 5px 0;
+}
+
+.project-expand-icon {
+    font-size: 1.2em;
+    color: var(--text-secondary);
+    transition: transform 0.3s;
+}
+
+.project-actions {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 8px;
+}
+
+.btn-edit-project,
+.btn-delete-project {
+    padding: 6px 12px;
+    font-size: 16px;
+}
+
+.btn-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-info:hover {
+    background: #138496;
+}
+
+/* Progress Comparison */
+.progress-comparison {
+    font-size: 0.9em;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.progress-comparison.ahead {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.progress-comparison.behind {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ff9800;
+}
+
+/* Expected Progress Marker */
+.expected-progress-marker {
+    position: absolute;
+    top: -25px;
+    transform: translateX(-50%);
+    font-size: 1.2em;
+    cursor: help;
+    z-index: 10;
+    animation: bounce 2s infinite;
+}
+
+.progress-bar-container {
+    position: relative;
+}
+
+/* Project Books Expanded */
+.project-books-expanded {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.3s ease-out;
+}
+
+.project-books-expanded h4 {
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    font-size: 1.1em;
+}
+
+.project-books-simple-list {
+    display: grid;
+    gap: 10px;
+}
+
+.project-book-simple-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.project-book-simple-item:hover {
+    background: rgba(0, 0, 0, 0.06);
+    transform: translateX(5px);
+}
+
+.book-thumbnail-small {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.book-thumbnail-placeholder-small {
+    width: 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    font-size: 1.5em;
+}
+
+.book-simple-details {
+    flex: 1;
+}
+
+.book-simple-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+}
+
+.book-simple-author {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+/* Project Modal */
+.modal-large .modal-content {
+    max-width: 700px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+/* Project Books Selection */
+.project-books-selection {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 15px;
+    background: #f8f9fa;
+}
+
+.project-book-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.project-book-item:hover {
+    background: #e9ecef;
+    transform: translateX(3px);
+}
+
+.book-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.book-thumbnail {
+    width: 50px;
+    height: 75px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.book-thumbnail-placeholder {
+    width: 50px;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    font-size: 2em;
+}
+
+.book-details {
+    flex: 1;
+}
+
+.book-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.book-author {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.no-books {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-style: italic;
+}
+
+/* Books Header with Create Project Button */
+.books-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.view-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#create-project-btn {
+    font-size: 14px;
+    padding: 10px 20px;
+}
+
+/* Dark Mode Adjustments for Projects */
+body.dark-mode .project-card {
+    border-left-color: var(--accent-color);
+}
+
+body.dark-mode .project-books-selection {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .project-book-item {
+    background: var(--card-bg);
+}
+
+body.dark-mode .project-book-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .book-title {
+    color: var(--text-primary);
+}
+
+body.dark-mode .book-author {
+    color: var(--text-secondary);
+}
+
+body.dark-mode .project-book-simple-item {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .project-book-simple-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .btn-info {
+    background: #17a2b8;
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+body.dark-mode .btn-info:hover {
+    background: #117a8b;
+    box-shadow: 0 5px 15px rgba(23, 162, 184, 0.5);
 }

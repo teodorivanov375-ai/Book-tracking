@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="bg">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -15,14 +17,22 @@
                 <button id="theme-toggle" class="theme-toggle" title="Смени темата">🌙</button>
                 <button id="color-picker-toggle" class="color-picker-toggle" title="Избери акцентен цвят">🎨</button>
                 <div id="color-picker-panel" class="color-picker-panel" style="display: none;">
-                    <div class="color-option" data-color-light="#52b788" data-color-dark="#2d6a4f" style="background: #52b788;"></div>
-                    <div class="color-option" data-color-light="#3a86ff" data-color-dark="#0056d2" style="background: #3a86ff;"></div>
-                    <div class="color-option" data-color-light="#8338ec" data-color-dark="#5a189a" style="background: #8338ec;"></div>
-                    <div class="color-option" data-color-light="#ff006e" data-color-dark="#c9184a" style="background: #ff006e;"></div>
-                    <div class="color-option" data-color-light="#fb5607" data-color-dark="#d00000" style="background: #fb5607;"></div>
-                    <div class="color-option" data-color-light="#06d6a0" data-color-dark="#0a9396" style="background: #06d6a0;"></div>
-                    <div class="color-option" data-color-light="#e63946" data-color-dark="#a4161a" style="background: #e63946;"></div>
-                    <div class="color-option" data-color-light="#ffbe0b" data-color-dark="#d4a418" style="background: #ffbe0b;"></div>
+                    <div class="color-option" data-color-light="#52b788" data-color-dark="#2d6a4f"
+                        style="background: #52b788;"></div>
+                    <div class="color-option" data-color-light="#3a86ff" data-color-dark="#0056d2"
+                        style="background: #3a86ff;"></div>
+                    <div class="color-option" data-color-light="#8338ec" data-color-dark="#5a189a"
+                        style="background: #8338ec;"></div>
+                    <div class="color-option" data-color-light="#ff006e" data-color-dark="#c9184a"
+                        style="background: #ff006e;"></div>
+                    <div class="color-option" data-color-light="#fb5607" data-color-dark="#d00000"
+                        style="background: #fb5607;"></div>
+                    <div class="color-option" data-color-light="#06d6a0" data-color-dark="#0a9396"
+                        style="background: #06d6a0;"></div>
+                    <div class="color-option" data-color-light="#e63946" data-color-dark="#a4161a"
+                        style="background: #e63946;"></div>
+                    <div class="color-option" data-color-light="#ffbe0b" data-color-dark="#d4a418"
+                        style="background: #ffbe0b;"></div>
                 </div>
             </div>
         </header>
@@ -30,7 +40,8 @@
         <!-- Tab Navigation -->
         <div class="tab-navigation">
             <button class="tab-btn active" data-tab="add-book"><span class="add-icon">+</span> Добави книга</button>
-            <button class="tab-btn" data-tab="book-list"><img src="images/ic_menu.svg" alt="" class="tab-icon"> Списък с книги</button>
+            <button class="tab-btn" data-tab="book-list"><img src="images/ic_menu.svg" alt="" class="tab-icon"> Списък с
+                книги</button>
             <button class="tab-btn" data-tab="completed-books">✅ Завършени книги</button>
             <button class="tab-btn" data-tab="statistics">📊 Статистики</button>
             <button class="tab-btn" data-tab="activity">🔔 Активност</button>
@@ -44,7 +55,8 @@
                 <div class="form-group">
                     <label for="book-name">
                         Име на книга:
-                        <button type="button" class="manage-suggestions-btn" data-type="name" title="Управление на предложения">⚙️</button>
+                        <button type="button" class="manage-suggestions-btn" data-type="name"
+                            title="Управление на предложения">⚙️</button>
                     </label>
                     <input type="text" id="book-name" list="book-names-list" required autocomplete="off">
                     <datalist id="book-names-list"></datalist>
@@ -53,7 +65,8 @@
                 <div class="form-group">
                     <label for="book-author">
                         Автор:
-                        <button type="button" class="manage-suggestions-btn" data-type="author" title="Управление на предложения">⚙️</button>
+                        <button type="button" class="manage-suggestions-btn" data-type="author"
+                            title="Управление на предложения">⚙️</button>
                     </label>
                     <input type="text" id="book-author" list="authors-list" required autocomplete="off">
                     <datalist id="authors-list"></datalist>
@@ -124,25 +137,28 @@
             <div class="books-header">
                 <h2>Списък с книги</h2>
                 <div class="view-controls">
+                    <button id="create-project-btn" class="btn btn-primary" title="Създай проект">📁 Създай
+                        проект</button>
                     <button id="view-toggle" class="view-toggle" title="Смени изглед">
                         <span class="view-icon">📚</span>
                     </button>
                 </div>
             </div>
-            
+
             <!-- Category filter -->
             <div class="filter-container">
                 <button class="filter-btn active" data-category="mama">Уговорка с Мама</button>
                 <button class="filter-btn" data-category="yavor">Уговорка с Явор</button>
                 <button class="filter-btn" data-category="choice">По желание</button>
             </div>
-            
+
             <!-- Search bar -->
             <div class="search-container">
                 <img src="images/ic_search.svg" alt="Search" class="search-icon">
-                <input type="text" id="search-input" class="search-input" placeholder="Търси по име на книга или автор...">
+                <input type="text" id="search-input" class="search-input"
+                    placeholder="Търси по име на книга или автор...">
             </div>
-            
+
             <div id="books-list" class="books-list"></div>
             <div id="empty-state" class="empty-state">
                 Все още няма добавени книги. Добави първата си книга отгоре! 📖
@@ -152,13 +168,14 @@
         <!-- Completed books list -->
         <div class="tab-content books-section" id="completed-books" style="display: none;">
             <h2>Завършени книги <span id="completed-count" class="count-badge"></span></h2>
-            
+
             <!-- Search bar -->
             <div class="search-container">
                 <img src="images/ic_search.svg" alt="Search" class="search-icon">
-                <input type="text" id="search-completed-input" class="search-input" placeholder="Търси в завършените книги...">
+                <input type="text" id="search-completed-input" class="search-input"
+                    placeholder="Търси в завършените книги...">
             </div>
-            
+
             <div id="completed-books-list" class="books-list"></div>
             <div id="completed-empty-state" class="empty-state">
                 Все още няма завършени книги. 🎉
@@ -169,7 +186,7 @@
         <div class="tab-content" id="statistics" style="display: none;">
             <div class="statistics-container">
                 <h2>� Статистики</h2>
-                                <!-- Export/Import section -->
+                <!-- Export/Import section -->
                 <div class="export-import-section">
                     <h3>💾 Експорт и Импорт на данни</h3>
                     <div class="export-import-buttons">
@@ -178,7 +195,7 @@
                         <input type="file" id="import-data-file" accept=".json" style="display: none;">
                     </div>
                 </div>
-                                <div class="stats-overview">
+                <div class="stats-overview">
                     <div class="stat-box">
                         <div class="stat-number" id="stat-total-books">0</div>
                         <div class="stat-label">Общо книги</div>
@@ -246,7 +263,7 @@
             <h2>Добави прогрес</h2>
             <form id="log-form">
                 <input type="hidden" id="log-book-id">
-                
+
                 <div class="form-group">
                     <label for="log-date">Дата:</label>
                     <input type="date" id="log-date" required>
@@ -290,7 +307,7 @@
             <h2>Промяна на категория</h2>
             <p>Книга: <strong id="category-book-name"></strong></p>
             <input type="hidden" id="category-book-id">
-            
+
             <div class="form-group">
                 <label>Избери категория:</label>
                 <div class="radio-group">
@@ -323,7 +340,7 @@
             <h2>Редактирай книга</h2>
             <form id="edit-book-form">
                 <input type="hidden" id="edit-book-id">
-                
+
                 <div class="form-group">
                     <label for="edit-book-name">Име на книга:</label>
                     <input type="text" id="edit-book-name" required>
@@ -379,7 +396,8 @@
                         <div class="duration-group">
                             <input type="number" id="edit-total-hours" min="0" placeholder="Часове" value="0">
                             <span>:</span>
-                            <input type="number" id="edit-total-minutes" min="0" max="59" placeholder="Минути" value="0">
+                            <input type="number" id="edit-total-minutes" min="0" max="59" placeholder="Минути"
+                                value="0">
                         </div>
                     </div>
                 </div>
@@ -430,6 +448,146 @@
         </div>
     </div>
 
+    <!-- Project Creation Modal -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close">&times;</span>
+            <h2>Създай проект</h2>
+            <form id="project-form">
+                <div class="form-group">
+                    <label for="project-name">Име на проект:</label>
+                    <input type="text" id="project-name" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="project-start-date">Начална дата:</label>
+                        <input type="date" id="project-start-date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project-end-date">Крайна дата:</label>
+                        <input type="date" id="project-end-date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Категория:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="project-category" value="mama" checked>
+                            Уговорка с Мама
+                        </label>
+                        <label>
+                            <input type="radio" name="project-category" value="yavor">
+                            Уговорка с Явор
+                        </label>
+                        <label>
+                            <input type="radio" name="project-category" value="choice">
+                            По желание
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Тип книги:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="project-type" value="paper" checked>
+                            📖 Хартиени книги
+                        </label>
+                        <label>
+                            <input type="radio" name="project-type" value="audio">
+                            🎧 Аудио книги
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="project-book-search">Търси книги:</label>
+                    <input type="text" id="project-book-search" class="search-input" placeholder="Търси по заглавие...">
+                </div>
+
+                <div class="form-group">
+                    <label>Избери книги за проекта:</label>
+                    <div id="project-books-list" class="project-books-selection">
+                        <!-- Books will be rendered here -->
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Създай</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-project">Отказ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Project Edit Modal -->
+    <div id="edit-project-modal" class="modal">
+        <div class="modal-content modal-large">
+            <span class="close">&times;</span>
+            <h2>Редактирай проект</h2>
+            <form id="edit-project-form">
+                <input type="hidden" id="edit-project-id">
+
+                <div class="form-group">
+                    <label for="edit-project-name">Име на проект:</label>
+                    <input type="text" id="edit-project-name" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-project-start-date">Начална дата:</label>
+                        <input type="date" id="edit-project-start-date">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-end-date">Крайна дата:</label>
+                        <input type="date" id="edit-project-end-date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Категория:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="edit-project-category" value="mama">
+                            Уговорка с Мама
+                        </label>
+                        <label>
+                            <input type="radio" name="edit-project-category" value="yavor">
+                            Уговорка с Явор
+                        </label>
+                        <label>
+                            <input type="radio" name="edit-project-category" value="choice">
+                            По желание
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-project-book-search">Търси книги:</label>
+                    <input type="text" id="edit-project-book-search" class="search-input"
+                        placeholder="Търси по заглавие...">
+                </div>
+
+                <div class="form-group">
+                    <label>Избери книги за проекта:</label>
+                    <div id="edit-project-books-list" class="project-books-selection">
+                        <!-- Books will be rendered here -->
+                    </div>
+                </div>
+
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">Запази промените</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-project">Отказ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
+
 </html>

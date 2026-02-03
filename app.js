@@ -39,16 +39,93 @@ class Book {
             this.status = 'completed';
             this.completed = true;
         } else {
-            this.status = 'in-progress';
         }
     }
 }
+
+// Project class to represent a collection of books
+class Project {
+    constructor(id, name, type, category, bookIds = [], startDate = null, endDate = null) {
+        this.id = id;
+        this.name = name;
+        this.type = type; // 'paper' or 'audio'
+        this.category = category; // 'mama', 'yavor', or 'choice'
+        this.bookIds = bookIds; // array of book IDs
+        this.startDate = startDate; // ISO date string
+        this.endDate = endDate; // ISO date string
+        this.expanded = false; // UI state for expand/collapse
+    }
+
+    getBooks() {
+        return books.filter(book => this.bookIds.includes(book.id));
+    }
+
+    getTotalPages() {
+        return this.getBooks().reduce((sum, book) => sum + book.total, 0);
+    }
+
+    getTotalProgress() {
+        return this.getBooks().reduce((sum, book) => sum + book.getTotalProgress(), 0);
+    }
+
+    getProgressPercentage() {
+        const total = this.getTotalPages();
+        if (total === 0) return 0;
+        const progress = this.getTotalProgress();
+        return Math.min(Math.round((progress / total) * 100), 100);
+    }
+
+    getRemainingAmount() {
+        return Math.max(this.getTotalPages() - this.getTotalProgress(), 0);
+    }
+
+    isCompleted() {
+        const projectBooks = this.getBooks();
+        if (projectBooks.length === 0) return false;
+        return projectBooks.every(book => book.completed);
+    }
+
+    getTotalDays() {
+        if (!this.startDate || !this.endDate) return 0;
+        const start = new Date(this.startDate);
+        const end = new Date(this.endDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
+
+    getDaysElapsed() {
+        if (!this.startDate) return 0;
+        const start = new Date(this.startDate);
+        const today = new Date();
+        const diffTime = Math.max(today - start, 0);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
+
+    getExpectedProgressPercentage() {
+        const totalDays = this.getTotalDays();
+        if (totalDays === 0) return 0;
+        const daysElapsed = this.getDaysElapsed();
+        const expectedPercentage = Math.min((daysElapsed / totalDays) * 100, 100);
+        return Math.round(expectedPercentage);
+    }
+
+    getExpectedProgress() {
+        const total = this.getTotalPages();
+        const expectedPercentage = this.getExpectedProgressPercentage();
+        return Math.round((total * expectedPercentage) / 100);
+    }
+}
+
 
 // ========================
 // APPLICATION STATE
 // ========================
 
 let books = [];
+let projects = [];
+
 let currentStreak = 0;
 let longestStreak = 0;
 let activityFeed = []; // {type, message, date, bookName}
@@ -84,6 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadViewMode();
     loadAccentColor();
     loadBooks();
+    loadProjects();
+
     loadStreaks();
     loadActivityFeed();
     loadAchievements();
@@ -118,7 +197,7 @@ function setupEventListeners() {
         btn.addEventListener('click', (e) => {
             const tabName = e.currentTarget.dataset.tab;
             switchTab(tabName);
-            
+
             // Update active state
             document.querySelectorAll('.tab-btn').forEach(item => {
                 item.classList.remove('active');
@@ -135,7 +214,7 @@ function setupEventListeners() {
                 item.classList.remove('active');
             });
             e.currentTarget.classList.add('active');
-            
+
             // Filter books
             const category = e.currentTarget.dataset.category;
             currentCategoryFilter = category; // Save current filter
@@ -200,7 +279,7 @@ function setupEventListeners() {
     if (editBookForm) {
         editBookForm.addEventListener('submit', handleEditBook);
     }
-    
+
     const cancelEditBtn = document.getElementById('cancel-edit');
     if (cancelEditBtn) {
         cancelEditBtn.addEventListener('click', () => {
@@ -210,7 +289,7 @@ function setupEventListeners() {
             }
         });
     }
-    
+
     // Toggle between paper and audio fields in edit modal
     document.querySelectorAll('input[name="edit-book-type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
@@ -225,16 +304,16 @@ function setupEventListeners() {
             }
         });
     });
-    
+
     // Cover preview for add and edit forms
     document.getElementById('book-cover').addEventListener('input', (e) => {
         showCoverPreview('cover-preview', e.target.value);
     });
-    
+
     document.getElementById('edit-book-cover').addEventListener('input', (e) => {
         showCoverPreview('edit-cover-preview', e.target.value);
     });
-    
+
     // Export/Import buttons
     document.getElementById('export-data-btn').addEventListener('click', exportData);
     document.getElementById('import-data-file').addEventListener('change', importData);
@@ -264,25 +343,89 @@ function setupEventListeners() {
     if (viewToggle) {
         viewToggle.addEventListener('click', toggleViewMode);
     }
-    
+
     // Manage suggestions buttons
     document.querySelectorAll('.manage-suggestions-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const type = this.dataset.type;
             openSuggestionsManager(type);
         });
     });
-    
+
     // Close suggestions manager
     const closeSuggestionsBtn = document.getElementById('close-suggestions-btn');
     if (closeSuggestionsBtn) {
         closeSuggestionsBtn.addEventListener('click', closeSuggestionsManager);
     }
-    
+
     // Cancel status button
     const cancelStatusBtn = document.getElementById('cancel-status-btn');
     if (cancelStatusBtn) {
         cancelStatusBtn.addEventListener('click', closeStatusModal);
+    }
+
+    // Project creation button
+    const createProjectBtn = document.getElementById('create-project-btn');
+    if (createProjectBtn) {
+        createProjectBtn.addEventListener('click', openCreateProjectModal);
+    }
+
+    // Project form submission
+    const projectForm = document.getElementById('project-form');
+    if (projectForm) {
+        projectForm.addEventListener('submit', handleCreateProject);
+    }
+
+    // Cancel project button
+    const cancelProjectBtn = document.getElementById('cancel-project');
+    if (cancelProjectBtn) {
+        cancelProjectBtn.addEventListener('click', () => {
+            document.getElementById('project-modal').style.display = 'none';
+        });
+    }
+
+    // Project type change - update book list
+    document.querySelectorAll('input[name="project-type"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            renderProjectBooksList('project-books-list', 'project-book-search', 'project-type');
+        });
+    });
+
+    // Project book search
+    const projectBookSearch = document.getElementById('project-book-search');
+    if (projectBookSearch) {
+        projectBookSearch.addEventListener('input', () => {
+            renderProjectBooksList('project-books-list', 'project-book-search', 'project-type');
+        });
+    }
+
+    // Edit project form submission
+    const editProjectForm = document.getElementById('edit-project-form');
+    if (editProjectForm) {
+        editProjectForm.addEventListener('submit', handleEditProject);
+    }
+
+    // Cancel edit project button
+    const cancelEditProjectBtn = document.getElementById('cancel-edit-project');
+    if (cancelEditProjectBtn) {
+        cancelEditProjectBtn.addEventListener('click', () => {
+            document.getElementById('edit-project-modal').style.display = 'none';
+        });
+    }
+
+    // Edit project type change - update book list
+    document.querySelectorAll('input[name="edit-project-type"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            renderProjectBooksList('edit-project-books-list', 'edit-project-book-search', 'edit-project-type');
+        });
+    });
+
+    // Edit project book search
+    const editProjectBookSearch = document.getElementById('edit-project-book-search');
+    if (editProjectBookSearch) {
+        editProjectBookSearch.addEventListener('input', () => {
+            renderProjectBooksList('edit-project-books-list', 'edit-project-book-search', 'edit-project-type');
+        });
     }
 
     // Close modal when clicking outside
@@ -309,6 +452,14 @@ function setupEventListeners() {
         if (e.target === suggestionsModal) {
             suggestionsModal.style.display = 'none';
         }
+        const projectModal = document.getElementById('project-modal');
+        if (e.target === projectModal) {
+            projectModal.style.display = 'none';
+        }
+        const editProjectModal = document.getElementById('edit-project-modal');
+        if (e.target === editProjectModal) {
+            editProjectModal.style.display = 'none';
+        }
     });
 }
 
@@ -325,7 +476,7 @@ function switchTab(tabName) {
         activeTab.classList.add('active');
         activeTab.style.display = 'block';
     }
-    
+
     // Update tab buttons active state
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -334,7 +485,7 @@ function switchTab(tabName) {
     if (activeBtn) {
         activeBtn.classList.add('active');
     }
-    
+
     // Update statistics when switching to statistics tab
     if (tabName === 'statistics') {
         renderStatistics();
@@ -372,19 +523,19 @@ function handleAddBook(e) {
     saveBooks();
     renderBooks();
     addBookForm.reset();
-    
+
     // Reset cover preview
     showCoverPreview('cover-preview', '');
-    
+
     // Update autocomplete lists
     updateAutocomplete();
-    
+
     // Add activity and check achievements
     addActivity('Добавяне', `Добавена книга "${name}"`, name);
     checkAchievements();
     renderStatistics();
     renderCharts();
-    
+
     // Switch to book list tab after adding
     switchTab('book-list');
 }
@@ -395,7 +546,7 @@ function handleAddLog(e) {
 
     const bookId = document.getElementById('log-book-id').value;
     const date = document.getElementById('log-date').value;
-    
+
     const book = books.find(b => b.id === bookId);
     if (!book) return;
 
@@ -423,12 +574,12 @@ function handleAddLog(e) {
     renderBooks();
     renderStreakDisplay();
     renderStatistics();
-    
+
     // Add activity
     const unit = book.type === 'paper' ? 'страници' : 'минути';
     addActivity('Прогрес', `${amount} ${unit} за "${book.name}"`, book.name);
     checkAchievements();
-    
+
     logModal.style.display = 'none';
     logForm.reset();
 }
@@ -458,7 +609,7 @@ function openLogsModal(bookId) {
     if (!book) return;
 
     document.getElementById('logs-modal-title').textContent = `История на прогреса: ${book.name}`;
-    
+
     const logsList = document.getElementById('logs-list');
     logsList.innerHTML = '';
 
@@ -468,7 +619,7 @@ function openLogsModal(bookId) {
         book.logs.forEach((log, index) => {
             const logEntry = document.createElement('div');
             logEntry.className = 'log-entry';
-            
+
             const dateFormatted = new Date(log.date).toLocaleDateString('bg-BG', {
                 year: 'numeric',
                 month: 'long',
@@ -489,8 +640,8 @@ function openLogsModal(bookId) {
                 <span class="log-amount">${amountText}</span>
                 <button class="delete-log-btn" data-book-id="${bookId}" data-log-index="${index}" title="Изтрий">🗑️</button>
             `;
-            
-            logEntry.querySelector('.delete-log-btn').addEventListener('click', function() {
+
+            logEntry.querySelector('.delete-log-btn').addEventListener('click', function () {
                 deleteLog(this.dataset.bookId, parseInt(this.dataset.logIndex));
             });
             logsList.appendChild(logEntry);
@@ -511,10 +662,10 @@ function deleteLog(bookId, logIndex) {
 
     // Remove the log entry
     book.logs.splice(logIndex, 1);
-    
+
     // Update book status based on remaining logs
     book.updateStatus();
-    
+
     // Save and refresh
     saveBooks();
     updateStreaks();
@@ -522,10 +673,10 @@ function deleteLog(bookId, logIndex) {
     renderBooks();
     renderStreakDisplay();
     renderStatistics();
-    
+
     // Refresh the logs modal
     openLogsModal(bookId);
-    
+
     // Add activity
     addActivity('Изтриване', `Изтрит запис за прогрес на "${book.name}"`, book.name);
 }
@@ -537,7 +688,7 @@ function openCategoryModal(bookId) {
 
     document.getElementById('category-book-id').value = bookId;
     document.getElementById('category-book-name').textContent = book.name;
-    
+
     // Set current category
     const categoryRadios = document.querySelectorAll('input[name="change-category"]');
     categoryRadios.forEach(radio => {
@@ -551,7 +702,7 @@ function openCategoryModal(bookId) {
 function changeBookCategory() {
     const bookId = document.getElementById('category-book-id').value;
     const newCategory = document.querySelector('input[name="change-category"]:checked').value;
-    
+
     const book = books.find(b => b.id === bookId);
     if (!book) return;
 
@@ -577,7 +728,7 @@ function toggleBookCompletion(bookId) {
         }
         addActivity('Завършване', `Завършена книга "${book.name}"`, book.name);
         book.completed = true;
-        
+
         // Celebrate with confetti
         createConfetti();
     } else {
@@ -622,6 +773,188 @@ function naturalSort(a, b) {
     return a.name.localeCompare(b.name, 'bg', { numeric: true, sensitivity: 'base' });
 }
 
+// ========================
+// PROJECT MANAGEMENT
+// ========================
+
+// Open create project modal
+function openCreateProjectModal() {
+    document.getElementById('project-name').value = '';
+    document.getElementById('project-start-date').value = '';
+    document.getElementById('project-end-date').value = '';
+    document.querySelector('input[name="project-category"][value="mama"]').checked = true;
+    document.querySelector('input[name="project-type"][value="paper"]').checked = true;
+    document.getElementById('project-book-search').value = '';
+
+    renderProjectBooksList('project-books-list', 'project-book-search', 'project-type');
+    document.getElementById('project-modal').style.display = 'block';
+}
+
+// Render books list for project selection
+function renderProjectBooksList(listId, searchId, typeRadioName, selectedBookIds = []) {
+    const listContainer = document.getElementById(listId);
+    const searchInput = document.getElementById(searchId);
+    const selectedType = document.querySelector(`input[name="${typeRadioName}"]:checked`).value;
+    const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+
+    // Filter books by type and search query, exclude completed books
+    const availableBooks = books.filter(book => {
+        if (book.completed) return false;
+        if (book.type !== selectedType) return false;
+        if (searchQuery && !book.name.toLowerCase().includes(searchQuery)) return false;
+        return true;
+    }).sort(naturalSort);
+
+    if (availableBooks.length === 0) {
+        listContainer.innerHTML = '<div class="no-books">Няма налични книги от този тип</div>';
+        return;
+    }
+
+    listContainer.innerHTML = '';
+    availableBooks.forEach(book => {
+        const bookItem = document.createElement('div');
+        bookItem.className = 'project-book-item';
+
+        const isSelected = selectedBookIds.includes(book.id);
+
+        bookItem.innerHTML = `
+            <input type="checkbox" class="book-checkbox" data-book-id="${book.id}" ${isSelected ? 'checked' : ''}>
+            ${book.coverUrl ? `<img src="${escapeHtml(book.coverUrl)}" alt="${escapeHtml(book.name)}" class="book-thumbnail" onerror="this.style.display='none'">` : '<div class="book-thumbnail-placeholder">📖</div>'}
+            <div class="book-details">
+                <div class="book-title">${escapeHtml(book.name)}</div>
+                <div class="book-author">${escapeHtml(book.author)}</div>
+            </div>
+        `;
+
+        listContainer.appendChild(bookItem);
+    });
+}
+
+// Handle create project
+function handleCreateProject(e) {
+    e.preventDefault();
+
+    const name = document.getElementById('project-name').value.trim();
+    const startDate = document.getElementById('project-start-date').value || null;
+    const endDate = document.getElementById('project-end-date').value || null;
+    const category = document.querySelector('input[name="project-category"]:checked').value;
+    const type = document.querySelector('input[name="project-type"]:checked').value;
+
+    // Get selected books
+    const selectedCheckboxes = document.querySelectorAll('#project-books-list .book-checkbox:checked');
+    const bookIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.bookId);
+
+    if (!name) {
+        alert('Моля, въведете име на проекта!');
+        return;
+    }
+
+    if (bookIds.length === 0) {
+        alert('Моля, изберете поне една книга за проекта!');
+        return;
+    }
+
+    const id = Date.now().toString();
+    const project = new Project(id, name, type, category, bookIds, startDate, endDate);
+    projects.push(project);
+    saveProjects();
+    renderBooks();
+
+    document.getElementById('project-modal').style.display = 'none';
+    addActivity('Създаване', `Създаден проект "${name}"`, name);
+}
+
+// Open edit project modal
+function openEditProjectModal(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    document.getElementById('edit-project-id').value = projectId;
+    document.getElementById('edit-project-name').value = project.name;
+    document.getElementById('edit-project-start-date').value = project.startDate || '';
+    document.getElementById('edit-project-end-date').value = project.endDate || '';
+
+    // Set category
+    const categoryRadios = document.querySelectorAll('input[name="edit-project-category"]');
+    categoryRadios.forEach(radio => {
+        radio.checked = radio.value === project.category;
+    });
+
+    // Note: Type cannot be changed in edit mode, so we'll just display it
+    // For simplicity, we'll keep the type selector but disable it
+    const typeRadios = document.querySelectorAll('input[name="edit-project-type"]');
+    typeRadios.forEach(radio => {
+        radio.checked = radio.value === project.type;
+        radio.disabled = true; // Can't change type after creation
+    });
+
+    document.getElementById('edit-project-book-search').value = '';
+    renderProjectBooksList('edit-project-books-list', 'edit-project-book-search', 'edit-project-type', project.bookIds);
+    document.getElementById('edit-project-modal').style.display = 'block';
+}
+
+// Handle edit project
+function handleEditProject(e) {
+    e.preventDefault();
+
+    const projectId = document.getElementById('edit-project-id').value;
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    const name = document.getElementById('edit-project-name').value.trim();
+    const startDate = document.getElementById('edit-project-start-date').value || null;
+    const endDate = document.getElementById('edit-project-end-date').value || null;
+    const category = document.querySelector('input[name="edit-project-category"]:checked').value;
+
+    // Get selected books
+    const selectedCheckboxes = document.querySelectorAll('#edit-project-books-list .book-checkbox:checked');
+    const bookIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.bookId);
+
+    if (!name) {
+        alert('Моля, въведете име на проекта!');
+        return;
+    }
+
+    if (bookIds.length === 0) {
+        alert('Моля, изберете поне една книга за проекта!');
+        return;
+    }
+
+    project.name = name;
+    project.startDate = startDate;
+    project.endDate = endDate;
+    project.category = category;
+    project.bookIds = bookIds;
+
+    saveProjects();
+    renderBooks();
+
+    document.getElementById('edit-project-modal').style.display = 'none';
+    addActivity('Редактиране', `Редактиран проект "${name}"`, name);
+}
+
+// Delete project
+function deleteProject(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    if (confirm(`Сигурни ли сте, че искате да изтриете проекта "${project.name}"?`)) {
+        addActivity('Изтриване', `Изтрит проект "${project.name}"`, project.name);
+        projects = projects.filter(p => p.id !== projectId);
+        saveProjects();
+        renderBooks();
+    }
+}
+
+// Toggle project expansion
+function toggleProjectExpansion(projectId) {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    project.expanded = !project.expanded;
+    renderBooks();
+}
+
 // Render books list
 function renderBooks() {
     // Render all books
@@ -637,12 +970,30 @@ function renderBooks() {
         const yavorBooks = books.filter(book => book.category === 'yavor');
         const choiceBooks = books.filter(book => book.category === 'choice');
 
+        // Group projects by category
+        const mamaProjects = projects.filter(project => project.category === 'mama');
+        const yavorProjects = projects.filter(project => project.category === 'yavor');
+        const choiceProjects = projects.filter(project => project.category === 'choice');
+
         // Render Mama category
-        if (mamaBooks.length > 0) {
+        if (mamaBooks.length > 0 || mamaProjects.length > 0) {
             const mamaCategorySection = document.createElement('div');
             mamaCategorySection.className = 'category-section';
             mamaCategorySection.innerHTML = '<h3 class="category-title">📚 Уговорка с Мама</h3>';
             booksList.appendChild(mamaCategorySection);
+
+            // Render projects first
+            if (mamaProjects.length > 0) {
+                const projectsSection = document.createElement('div');
+                projectsSection.className = 'projects-section';
+                projectsSection.innerHTML = '<h4 class="type-title">📁 Проекти</h4>';
+                booksList.appendChild(projectsSection);
+
+                mamaProjects.forEach(project => {
+                    const projectCard = createProjectCard(project);
+                    booksList.appendChild(projectCard);
+                });
+            }
 
             // Paper books in Mama category
             const mamaPaperBooks = mamaBooks.filter(book => book.type === 'paper')
@@ -676,11 +1027,24 @@ function renderBooks() {
         }
 
         // Render Yavor category
-        if (yavorBooks.length > 0) {
+        if (yavorBooks.length > 0 || yavorProjects.length > 0) {
             const yavorCategorySection = document.createElement('div');
             yavorCategorySection.className = 'category-section';
             yavorCategorySection.innerHTML = '<h3 class="category-title">📚 Уговорка с Явор</h3>';
             booksList.appendChild(yavorCategorySection);
+
+            // Render projects first
+            if (yavorProjects.length > 0) {
+                const projectsSection = document.createElement('div');
+                projectsSection.className = 'projects-section';
+                projectsSection.innerHTML = '<h4 class="type-title">📁 Проекти</h4>';
+                booksList.appendChild(projectsSection);
+
+                yavorProjects.forEach(project => {
+                    const projectCard = createProjectCard(project);
+                    booksList.appendChild(projectCard);
+                });
+            }
 
             // Paper books in Yavor category
             const yavorPaperBooks = yavorBooks.filter(book => book.type === 'paper')
@@ -714,11 +1078,24 @@ function renderBooks() {
         }
 
         // Render Choice category
-        if (choiceBooks.length > 0) {
+        if (choiceBooks.length > 0 || choiceProjects.length > 0) {
             const choiceCategorySection = document.createElement('div');
             choiceCategorySection.className = 'category-section';
             choiceCategorySection.innerHTML = '<h3 class="category-title">📚 По желание</h3>';
             booksList.appendChild(choiceCategorySection);
+
+            // Render projects first
+            if (choiceProjects.length > 0) {
+                const projectsSection = document.createElement('div');
+                projectsSection.className = 'projects-section';
+                projectsSection.innerHTML = '<h4 class="type-title">📁 Проекти</h4>';
+                booksList.appendChild(projectsSection);
+
+                choiceProjects.forEach(project => {
+                    const projectCard = createProjectCard(project);
+                    booksList.appendChild(projectCard);
+                });
+            }
 
             // Paper books in Choice category
             const choicePaperBooks = choiceBooks.filter(book => book.type === 'paper')
@@ -754,7 +1131,7 @@ function renderBooks() {
 
     // Render completed books
     renderCompletedBooks();
-    
+
     // Reapply current category filter
     if (currentCategoryFilter) {
         filterBooksByCategory(currentCategoryFilter);
@@ -780,6 +1157,137 @@ function getProgressGradient(percentage) {
     }
 }
 
+// Create project card element
+function createProjectCard(project) {
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.setAttribute('data-project-id', project.id);
+
+    const escapedName = escapeHtml(project.name);
+    const progress = project.getTotalProgress();
+    const total = project.getTotalPages();
+    const percentage = project.getProgressPercentage();
+    const remaining = project.getRemainingAmount();
+    const expectedPercentage = project.getExpectedProgressPercentage();
+
+    // Get project icon based on type
+    const projectIcon = project.type === 'paper' ? '📚' : '🎧';
+
+    let totalText, progressText, remainingText;
+    if (project.type === 'paper') {
+        totalText = `${total} страници`;
+        progressText = `${progress} прочетени`;
+        remainingText = `${remaining} остават`;
+    } else {
+        const totalHours = Math.floor(total / 60);
+        const totalMinutes = total % 60;
+        totalText = totalHours > 0 ? `${totalHours}ч ${totalMinutes}мин` : `${totalMinutes}мин`;
+
+        const progressHours = Math.floor(progress / 60);
+        const progressMinutes = progress % 60;
+        progressText = progressHours > 0 ? `${progressHours}ч ${progressMinutes}мин изслушани` : `${progressMinutes}мин изслушани`;
+
+        const remainingHours = Math.floor(remaining / 60);
+        const remainingMinutes = remaining % 60;
+        remainingText = remainingHours > 0 ? `${remainingHours}ч ${remainingMinutes}мин остават` : `${remainingMinutes}мин остават`;
+    }
+
+    // Format dates
+    let dateText = '';
+    if (project.startDate && project.endDate) {
+        const startDate = new Date(project.startDate).toLocaleDateString('bg-BG');
+        const endDate = new Date(project.endDate).toLocaleDateString('bg-BG');
+        dateText = `<div class="project-dates">📅 ${startDate} - ${endDate}</div>`;
+    }
+
+    // Expected progress indicator
+    let expectedProgressHTML = '';
+    if (project.startDate && project.endDate) {
+        const isAhead = percentage >= expectedPercentage;
+        const statusEmoji = isAhead ? '🎯' : '⚠️';
+        const statusText = isAhead ? 'Напред сте!' : 'Изоставате';
+        const statusClass = isAhead ? 'ahead' : 'behind';
+
+        expectedProgressHTML = `
+            <div class="progress-comparison ${statusClass}">
+                <span>${statusEmoji} Очаквано: ${expectedPercentage}% | Действително: ${percentage}% - ${statusText}</span>
+            </div>
+            <div class="expected-progress-marker" style="left: ${expectedPercentage}%" title="Очакван прогрес: ${expectedPercentage}%">
+                📍
+            </div>
+        `;
+    }
+
+    card.innerHTML = `
+        <div class="project-header" onclick="toggleProjectExpansion('${project.id}')">
+            <div class="project-info">
+                <div class="project-icon">${projectIcon}</div>
+                <div>
+                    <h3>${escapedName}</h3>
+                    ${dateText}
+                    <span class="type-badge ${project.type}">
+                        ${project.type === 'paper' ? '📖 Хартиени книги' : '🎧 Аудио книги'} • ${totalText} • ${project.getBooks().length} книги
+                    </span>
+                </div>
+            </div>
+            <div class="project-expand-icon">
+                ${project.expanded ? '▼' : '▶'}
+            </div>
+        </div>
+
+        <div class="project-actions">
+            <button class="btn btn-info btn-edit-project" title="Редактирай">✏️</button>
+            <button class="btn btn-danger btn-delete-project">✕</button>
+        </div>
+
+        <div class="progress-section">
+            ${expectedProgressHTML}
+            <div class="progress-info">
+                <span>${progressText}</span>
+                <span>${remainingText}</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" style="width: ${percentage}%; background: ${getProgressGradient(percentage)}">
+                    ${percentage}%
+                </div>
+            </div>
+        </div>
+
+        ${project.expanded ? `
+            <div class="project-books-expanded">
+                <h4>Книги в проекта:</h4>
+                <div class="project-books-simple-list">
+                    ${project.getBooks().map(book => `
+                        <div class="project-book-simple-item">
+                            ${book.coverUrl ? `<img src="${escapeHtml(book.coverUrl)}" alt="${escapeHtml(book.name)}" class="book-thumbnail-small" onerror="this.style.display='none'">` : '<div class="book-thumbnail-placeholder-small">📖</div>'}
+                            <div class="book-simple-details">
+                                <div class="book-simple-name">${escapeHtml(book.name)}</div>
+                                <div class="book-simple-author">${escapeHtml(book.author)}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        ` : ''}
+    `;
+
+    // Add event listeners
+    const editBtn = card.querySelector('.btn-edit-project');
+    const deleteBtn = card.querySelector('.btn-delete-project');
+
+    editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditProjectModal(project.id);
+    });
+
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteProject(project.id);
+    });
+
+    return card;
+}
+
 // Create book card element
 function createBookCard(book) {
     const card = document.createElement('div');
@@ -788,7 +1296,7 @@ function createBookCard(book) {
 
     const escapedName = escapeHtml(book.name);
     const escapedAuthor = escapeHtml(book.author);
-    
+
     // Shelf view - simplified spine representation
     if (viewMode === 'shelf') {
         card.innerHTML = `
@@ -799,7 +1307,7 @@ function createBookCard(book) {
         `;
         return card;
     }
-    
+
     // Regular list view
     const progress = book.getTotalProgress();
     const percentage = book.getProgressPercentage();
@@ -823,7 +1331,7 @@ function createBookCard(book) {
         const remainingMinutes = remaining % 60;
         remainingText = remainingHours > 0 ? `${remainingHours}ч ${remainingMinutes}мин остават` : `${remainingMinutes}мин остават`;
     }
-    
+
     card.innerHTML = `
         <div class="book-header">
             <div class="book-info">
@@ -864,7 +1372,7 @@ function createBookCard(book) {
             <span>📊 История на прогреса (${book.logs.length} записа) - Кликни за детайли</span>
         </div>
     `;
-    
+
     // Add event listeners
     const bookId = book.id;
     card.querySelector('.btn-log').addEventListener('click', () => openLogModal(bookId));
@@ -880,53 +1388,53 @@ function createBookCard(book) {
 function updateStreaks() {
     // Get all unique dates from all books
     const allDates = new Set();
-    
+
     books.forEach(book => {
         book.logs.forEach(log => {
             allDates.add(log.date);
         });
     });
-    
+
     if (allDates.size === 0) {
         currentStreak = 0;
         longestStreak = 0;
         return;
     }
-    
+
     // Sort dates in descending order (newest first)
     const sortedDates = Array.from(allDates).sort((a, b) => new Date(b) - new Date(a));
-    
+
     // Calculate current streak
     currentStreak = 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     for (let i = 0; i < sortedDates.length; i++) {
         const logDate = new Date(sortedDates[i]);
         logDate.setHours(0, 0, 0, 0);
-        
+
         const expectedDate = new Date(today);
         expectedDate.setDate(today.getDate() - i);
-        
+
         if (logDate.getTime() === expectedDate.getTime()) {
             currentStreak++;
         } else {
             break;
         }
     }
-    
+
     // Calculate longest streak
     let tempStreak = 1;
     let maxStreak = 1;
-    
+
     for (let i = 0; i < sortedDates.length - 1; i++) {
         const currentDate = new Date(sortedDates[i]);
         const nextDate = new Date(sortedDates[i + 1]);
         currentDate.setHours(0, 0, 0, 0);
         nextDate.setHours(0, 0, 0, 0);
-        
+
         const diffDays = Math.round((currentDate - nextDate) / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays === 1) {
             tempStreak++;
             if (tempStreak > maxStreak) {
@@ -936,7 +1444,7 @@ function updateStreaks() {
             tempStreak = 1;
         }
     }
-    
+
     longestStreak = Math.max(longestStreak, maxStreak, currentStreak);
 }
 
@@ -963,7 +1471,7 @@ function renderStreakDisplay() {
     // Update in statistics tab
     const currentStreakStatsEl = document.getElementById('current-streak-stats');
     const longestStreakStatsEl = document.getElementById('longest-streak-stats');
-    
+
     if (currentStreakStatsEl) {
         currentStreakStatsEl.textContent = currentStreak;
     }
@@ -992,6 +1500,33 @@ function loadBooks() {
         });
     }
 }
+
+// Save projects to localStorage
+function saveProjects() {
+    localStorage.setItem('projects', JSON.stringify(projects));
+}
+
+// Load projects from localStorage
+function loadProjects() {
+    const saved = localStorage.getItem('projects');
+    if (saved) {
+        const parsed = JSON.parse(saved);
+        projects = parsed.map(data => {
+            const project = new Project(
+                data.id,
+                data.name,
+                data.type,
+                data.category || 'mama',
+                data.bookIds || [],
+                data.startDate || null,
+                data.endDate || null
+            );
+            project.expanded = false; // Always start collapsed
+            return project;
+        });
+    }
+}
+
 
 // Save hidden suggestions to localStorage
 function saveHiddenSuggestions() {
@@ -1031,14 +1566,14 @@ function showSuggestion(type, value) {
 // Handle search
 function handleSearch(e) {
     const searchTerm = e.target.value.toLowerCase().trim();
-    
+
     const bookCards = document.querySelectorAll('.book-card');
     let visibleCount = 0;
-    
+
     bookCards.forEach(card => {
         const bookName = card.querySelector('h3').textContent.toLowerCase();
         const bookAuthor = card.querySelector('.author').textContent.toLowerCase();
-        
+
         if (bookName.includes(searchTerm) || bookAuthor.includes(searchTerm)) {
             card.style.display = 'block';
             visibleCount++;
@@ -1046,7 +1581,7 @@ function handleSearch(e) {
             card.style.display = 'none';
         }
     });
-    
+
     // Show/hide empty state
     const emptyState = document.getElementById('empty-state');
     if (visibleCount === 0 && books.length > 0) {
@@ -1065,24 +1600,24 @@ function renderCompletedBooks() {
     const completedBooksList = document.getElementById('completed-books-list');
     const completedEmptyState = document.getElementById('completed-empty-state');
     const completedCountBadge = document.getElementById('completed-count');
-    
+
     const completedBooks = books.filter(book => book.completed)
         .sort(naturalSort);
-    
+
     // Update count badge
     if (completedCountBadge) {
         completedCountBadge.textContent = completedBooks.length > 0 ? `(${completedBooks.length})` : '';
     }
-    
+
     if (completedBooks.length === 0) {
         completedBooksList.innerHTML = '';
         completedEmptyState.style.display = 'block';
         return;
     }
-    
+
     completedEmptyState.style.display = 'none';
     completedBooksList.innerHTML = '';
-    
+
     completedBooks.forEach(book => {
         const bookCard = createBookCard(book);
         completedBooksList.appendChild(bookCard);
@@ -1092,14 +1627,14 @@ function renderCompletedBooks() {
 // Handle search for completed books
 function handleSearchCompleted(e) {
     const searchTerm = e.target.value.toLowerCase().trim();
-    
+
     const bookCards = document.querySelectorAll('#completed-books-list .book-card');
     let visibleCount = 0;
-    
+
     bookCards.forEach(card => {
         const bookName = card.querySelector('h3').textContent.toLowerCase();
         const bookAuthor = card.querySelector('.author').textContent.toLowerCase();
-        
+
         if (bookName.includes(searchTerm) || bookAuthor.includes(searchTerm)) {
             card.style.display = 'block';
             visibleCount++;
@@ -1107,11 +1642,11 @@ function handleSearchCompleted(e) {
             card.style.display = 'none';
         }
     });
-    
+
     // Show/hide empty state
     const completedEmptyState = document.getElementById('completed-empty-state');
     const completedBooks = books.filter(book => book.completed);
-    
+
     if (visibleCount === 0 && completedBooks.length > 0) {
         completedEmptyState.style.display = 'block';
         completedEmptyState.textContent = 'Няма намерени книги за "' + e.target.value + '"';
@@ -1128,20 +1663,20 @@ function filterBooksByCategory(category) {
     const categorySections = document.querySelectorAll('.category-section');
     const typeSections = document.querySelectorAll('.type-section');
     const bookCards = document.querySelectorAll('#books-list .book-card');
-    
+
     // Hide all first
     categorySections.forEach(section => section.style.display = 'none');
     typeSections.forEach(section => section.style.display = 'none');
     bookCards.forEach(card => card.style.display = 'none');
-    
+
     // Show only selected category
     let shouldShowBooks = false;
     const allElements = document.querySelectorAll('#books-list > *');
-    
+
     allElements.forEach(element => {
         if (element.classList.contains('category-section')) {
             const title = element.querySelector('.category-title').textContent;
-            if ((category === 'mama' && title.includes('Мама')) || 
+            if ((category === 'mama' && title.includes('Мама')) ||
                 (category === 'yavor' && title.includes('Явор')) ||
                 (category === 'choice' && title.includes('По желание'))) {
                 element.style.display = 'block';
@@ -1163,27 +1698,27 @@ function renderStatistics() {
     // Update streak display in statistics tab
     const statCurrentStreak = document.getElementById('stat-current-streak');
     if (statCurrentStreak) statCurrentStreak.textContent = currentStreak;
-    
+
     // Update statistics
     const statTotalBooks = document.getElementById('stat-total-books');
     const statCompletedBooks = document.getElementById('stat-completed-books');
     const statTotalPages = document.getElementById('stat-total-pages');
     const statTotalAudio = document.getElementById('stat-total-audio');
-    
+
     // Calculate total pages read from paper books
     const totalPagesRead = books
         .filter(b => b.type === 'paper')
         .reduce((sum, book) => sum + book.getTotalProgress(), 0);
-    
+
     // Calculate total audio time listened (in minutes)
     const totalAudioMinutes = books
         .filter(b => b.type === 'audio')
         .reduce((sum, book) => sum + book.getTotalProgress(), 0);
-    
+
     const audioHours = Math.floor(totalAudioMinutes / 60);
     const audioMins = totalAudioMinutes % 60;
     const audioTimeStr = audioMins > 0 ? `${audioHours}ч ${audioMins}м` : `${audioHours}ч`;
-    
+
     if (statTotalBooks) statTotalBooks.textContent = books.length;
     if (statCompletedBooks) statCompletedBooks.textContent = books.filter(b => b.completed).length;
     if (statTotalPages) statTotalPages.textContent = totalPagesRead;
@@ -1197,13 +1732,13 @@ function renderStatistics() {
 function updateAutocomplete() {
     // Sort books by most recent first (higher id = more recent)
     const sortedBooks = [...books].sort((a, b) => b.id - a.id);
-    
+
     // Get unique book names and authors (preserving order - most recent first)
     const bookNames = [];
     const authors = [];
     const seenNames = new Set();
     const seenAuthors = new Set();
-    
+
     sortedBooks.forEach(book => {
         if (!seenNames.has(book.name) && !hiddenSuggestions.names.includes(book.name)) {
             bookNames.push(book.name);
@@ -1214,19 +1749,19 @@ function updateAutocomplete() {
             seenAuthors.add(book.author);
         }
     });
-    
+
     // Update book names datalist with delete buttons
     const bookNamesList = document.getElementById('book-names-list');
     if (bookNamesList) {
-        bookNamesList.innerHTML = bookNames.map(name => 
+        bookNamesList.innerHTML = bookNames.map(name =>
             `<option value="${name}">`
         ).join('');
     }
-    
+
     // Update authors datalist
     const authorsList = document.getElementById('authors-list');
     if (authorsList) {
-        authorsList.innerHTML = authors.map(author => 
+        authorsList.innerHTML = authors.map(author =>
             `<option value="${author}">`
         ).join('');
     }
@@ -1237,15 +1772,15 @@ function openSuggestionsManager(type) {
     const modal = document.getElementById('suggestions-modal');
     const title = document.getElementById('suggestions-modal-title');
     const list = document.getElementById('suggestions-list');
-    
+
     title.textContent = type === 'name' ? 'Управление на имена на книги' : 'Управление на автори';
-    
+
     // Get all unique suggestions
     const allSuggestions = [...new Set(books.map(b => type === 'name' ? b.name : b.author))].sort();
     const hidden = type === 'name' ? hiddenSuggestions.names : hiddenSuggestions.authors;
-    
+
     list.innerHTML = '';
-    
+
     allSuggestions.forEach(suggestion => {
         const isHidden = hidden.includes(suggestion);
         const div = document.createElement('div');
@@ -1256,7 +1791,7 @@ function openSuggestionsManager(type) {
                 ${isHidden ? '👁️ Покажи' : '🚫 Скрий'}
             </button>
         `;
-        
+
         const btn = div.querySelector('button');
         btn.addEventListener('click', () => {
             if (isHidden) {
@@ -1266,10 +1801,10 @@ function openSuggestionsManager(type) {
             }
             openSuggestionsManager(type);
         });
-        
+
         list.appendChild(div);
     });
-    
+
     modal.style.display = 'flex';
 }
 
@@ -1286,15 +1821,15 @@ function openStatusModal(bookId) {
     const modal = document.getElementById('status-modal');
     const bookIdInput = document.getElementById('status-book-id');
     const book = books.find(b => b.id === bookId);
-    
+
     if (!book) return;
-    
+
     bookIdInput.value = bookId;
-    
+
     // Add click handlers to status options
     document.querySelectorAll('.status-option').forEach(btn => {
         btn.onclick = () => changeBookStatus(bookId, btn.dataset.status);
-        
+
         // Highlight current status
         if (btn.dataset.status === book.status) {
             btn.classList.add('active');
@@ -1302,7 +1837,7 @@ function openStatusModal(bookId) {
             btn.classList.remove('active');
         }
     });
-    
+
     modal.style.display = 'flex';
 }
 
@@ -1313,22 +1848,22 @@ function closeStatusModal() {
 function changeBookStatus(bookId, newStatus) {
     const book = books.find(b => b.id === bookId);
     if (!book) return;
-    
+
     book.status = newStatus;
-    
+
     // Update completed flag based on status
     if (newStatus === 'completed') {
         book.completed = true;
     } else if (newStatus === 'planned' || newStatus === 'in-progress') {
         book.completed = false;
     }
-    
+
     saveBooks();
     renderBooks();
     renderCompletedBooks();
     renderStatistics();
     closeStatusModal();
-    
+
     // Add activity
     const statusNames = {
         'planned': 'Планирана',
@@ -1350,7 +1885,7 @@ function toggleTheme() {
         themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
     }
     localStorage.setItem('theme', theme);
-    
+
     // Apply current accent color for new theme
     applyAccentColor();
 }
@@ -1387,16 +1922,16 @@ function hexToRgb(hex) {
 function adjustBrightness(hex, percent) {
     const rgb = hexToRgb(hex);
     if (!rgb) return hex;
-    
+
     const adjust = (value) => {
         const adjusted = Math.round(value + (value * percent / 100));
         return Math.max(0, Math.min(255, adjusted));
     };
-    
+
     const r = adjust(rgb.r).toString(16).padStart(2, '0');
     const g = adjust(rgb.g).toString(16).padStart(2, '0');
     const b = adjust(rgb.b).toString(16).padStart(2, '0');
-    
+
     return `#${r}${g}${b}`;
 }
 
@@ -1404,7 +1939,7 @@ function setAccentColor(colors) {
     accentColor = colors;
     applyAccentColor();
     localStorage.setItem('accentColor', JSON.stringify(colors));
-    
+
     // Update active state on color options
     document.querySelectorAll('.color-option').forEach(opt => {
         opt.classList.remove('active');
@@ -1417,11 +1952,11 @@ function setAccentColor(colors) {
 function applyAccentColor() {
     const currentColor = theme === 'dark' ? accentColor.dark : accentColor.light;
     console.log('Applying accent color:', currentColor, 'Theme:', theme);
-    
+
     // Променяме само основния фон и акцентния цвят
     document.documentElement.style.setProperty('--accent-color', currentColor);
     document.documentElement.style.setProperty('--bg-primary', currentColor);
-    
+
     // В тъмен режим не променяме цветовете на картите и менютата
     // Оставяме ги с оригиналните тъмни цветове от CSS
     if (theme === 'dark') {
@@ -1458,7 +1993,7 @@ function updateColorPickerDisplay() {
         if (color) {
             opt.style.background = color;
         }
-        
+
         // Set active state
         if (accentColor && opt.dataset.colorLight === accentColor.light && opt.dataset.colorDark === accentColor.dark) {
             opt.classList.add('active');
@@ -1482,15 +2017,15 @@ function applyViewMode() {
     const booksList = document.getElementById('books-list');
     const viewToggle = document.getElementById('view-toggle');
     const viewIcon = viewToggle?.querySelector('.view-icon');
-    
+
     if (booksList) {
         booksList.className = viewMode === 'shelf' ? 'shelf-view' : '';
     }
-    
+
     if (viewIcon) {
         viewIcon.textContent = viewMode === 'list' ? '📚' : '📋';
     }
-    
+
     // Re-render books to apply proper structure for shelf view
     renderBooks();
 }
@@ -1510,7 +2045,7 @@ function loadViewMode() {
 function createConfetti() {
     const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f7dc6f', '#bb8fce', '#52b788'];
     const confettiCount = 50;
-    
+
     for (let i = 0; i < confettiCount; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
@@ -1519,7 +2054,7 @@ function createConfetti() {
         confetti.style.animationDelay = Math.random() * 0.3 + 's';
         confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
         document.body.appendChild(confetti);
-        
+
         // Remove after animation
         setTimeout(() => confetti.remove(), 3000);
     }
@@ -1545,12 +2080,12 @@ function addActivity(type, message, bookName = '') {
 function renderActivityFeed() {
     const list = document.getElementById('activity-list');
     if (!list) return;
-    
+
     if (activityFeed.length === 0) {
         list.innerHTML = '<div class="empty-state">Все още няма активност</div>';
         return;
     }
-    
+
     list.innerHTML = activityFeed.map(activity => `
         <div class="activity-item">
             <div class="activity-type">${getActivityIcon(activity.type)} ${activity.type}</div>
@@ -1577,7 +2112,7 @@ function formatDate(isoDate) {
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
-    
+
     if (minutes < 1) return 'Току-що';
     if (minutes < 60) return `Преди ${minutes} мин`;
     if (hours < 24) return `Преди ${hours} ч`;
@@ -1640,7 +2175,7 @@ function checkAchievements() {
 function renderAchievements() {
     const grid = document.getElementById('achievements-grid');
     if (!grid) return;
-    
+
     grid.innerHTML = achievementsList.map(achievement => {
         const userAch = achievements.find(a => a.id === achievement.id);
         const unlocked = userAch ? userAch.unlocked : false;
@@ -1682,19 +2217,19 @@ function openEditModal(bookId) {
     document.getElementById('edit-book-name').value = book.name;
     document.getElementById('edit-book-author').value = book.author;
     document.getElementById('edit-book-cover').value = book.coverUrl || '';
-    
+
     // Set category
     const categoryRadios = document.querySelectorAll('input[name="edit-book-category"]');
     categoryRadios.forEach(radio => {
         radio.checked = radio.value === book.category;
     });
-    
+
     // Set type
     const typeRadios = document.querySelectorAll('input[name="edit-book-type"]');
     typeRadios.forEach(radio => {
         radio.checked = radio.value === book.type;
     });
-    
+
     // Set fields based on type
     if (book.type === 'paper') {
         editPaperFields.style.display = 'block';
@@ -1708,26 +2243,26 @@ function openEditModal(bookId) {
         document.getElementById('edit-total-hours').value = hours;
         document.getElementById('edit-total-minutes').value = minutes;
     }
-    
+
     // Show cover preview
     showCoverPreview('edit-cover-preview', book.coverUrl);
-    
+
     editModal.style.display = 'block';
 }
 
 function handleEditBook(e) {
     e.preventDefault();
-    
+
     const bookId = document.getElementById('edit-book-id').value;
     const book = books.find(b => b.id === bookId);
     if (!book) return;
-    
+
     book.name = document.getElementById('edit-book-name').value.trim();
     book.author = document.getElementById('edit-book-author').value.trim();
     book.category = document.querySelector('input[name="edit-book-category"]:checked').value;
     book.type = document.querySelector('input[name="edit-book-type"]:checked').value;
     book.coverUrl = document.getElementById('edit-book-cover').value.trim();
-    
+
     if (book.type === 'paper') {
         book.total = parseInt(document.getElementById('edit-total-pages').value) || 0;
     } else {
@@ -1735,7 +2270,7 @@ function handleEditBook(e) {
         const minutes = parseInt(document.getElementById('edit-total-minutes').value) || 0;
         book.total = hours * 60 + minutes;
     }
-    
+
     book.updateStatus();
     saveBooks();
     renderBooks();
@@ -1748,7 +2283,7 @@ function handleEditBook(e) {
 function showCoverPreview(previewId, url) {
     const preview = document.getElementById(previewId);
     if (!preview) return;
-    
+
     if (url) {
         preview.innerHTML = `<img src="${url}" alt="Cover preview" onerror="this.parentElement.innerHTML='<div class=\\'cover-error\\'>Невалиден URL</div>'">`;
         preview.style.display = 'block';
@@ -1771,27 +2306,27 @@ function exportData() {
         dailyGoal: dailyGoal,
         exportDate: new Date().toISOString()
     };
-    
+
     const dataStr = JSON.stringify(data, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    
+
     const link = document.createElement('a');
     link.href = URL.createObjectURL(dataBlob);
     link.download = `book-tracking-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-    
+
     addActivity('Експорт', 'Данните са експортирани', '');
 }
 
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         try {
             const data = JSON.parse(e.target.result);
-            
+
             if (confirm('Сигурни ли сте, че искате да импортирате данни? Това ще замести текущите данни.')) {
                 // Restore books
                 if (data.books) {
@@ -1812,31 +2347,31 @@ function importData(event) {
                     });
                     saveBooks();
                 }
-                
+
                 // Restore streaks
                 if (data.streaks) {
                     currentStreak = data.streaks.currentStreak || 0;
                     longestStreak = data.streaks.longestStreak || 0;
                     saveStreaks();
                 }
-                
+
                 // Restore activity feed
                 if (data.activityFeed) {
                     activityFeed = data.activityFeed;
                     saveActivityFeed();
                 }
-                
+
                 // Restore achievements
                 if (data.achievements) {
                     achievements = data.achievements;
                     saveAchievements();
                 }
-                
+
                 // Restore daily goal
                 if (data.dailyGoal) {
                     dailyGoal = data.dailyGoal;
                 }
-                
+
                 // Re-render everything
                 renderBooks();
                 renderStreakDisplay();
@@ -1844,7 +2379,7 @@ function importData(event) {
                 renderActivityFeed();
                 renderAchievements();
                 renderCharts();
-                
+
                 addActivity('Импорт', 'Данните са импортирани успешно', '');
                 alert('Данните са импортирани успешно!');
             }
@@ -1853,7 +2388,7 @@ function importData(event) {
         }
     };
     reader.readAsText(file);
-    
+
     // Reset file input
     event.target.value = '';
 }
@@ -1873,35 +2408,35 @@ function renderCharts() {
 function renderProgressChart() {
     const ctx = document.getElementById('progress-chart');
     if (!ctx) return;
-    
+
     // Destroy existing chart
     if (progressChart) {
         progressChart.destroy();
     }
-    
+
     // Get progress data over last 30 days
     const days = 30;
     const today = new Date();
     const labels = [];
     const data = [];
-    
+
     for (let i = days - 1; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
-        
+
         labels.push(date.toLocaleDateString('bg-BG', { month: 'short', day: 'numeric' }));
-        
+
         // Calculate total progress for this day
         let dayProgress = 0;
         books.forEach(book => {
             const dayLogs = book.logs.filter(log => log.date === dateStr);
             dayProgress += dayLogs.reduce((sum, log) => sum + log.amount, 0);
         });
-        
+
         data.push(dayProgress);
     }
-    
+
     progressChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -1939,12 +2474,12 @@ function renderProgressChart() {
 function renderCategoryChart() {
     const ctx = document.getElementById('category-chart');
     if (!ctx) return;
-    
+
     // Destroy existing chart
     if (categoryChart) {
         categoryChart.destroy();
     }
-    
+
     // Count books by category and status
     const mamaTotal = books.filter(b => b.category === 'mama').length;
     const yavorTotal = books.filter(b => b.category === 'yavor').length;
@@ -1952,7 +2487,7 @@ function renderCategoryChart() {
     const mamaCompleted = books.filter(b => b.category === 'mama' && b.completed).length;
     const yavorCompleted = books.filter(b => b.category === 'yavor' && b.completed).length;
     const choiceCompleted = books.filter(b => b.category === 'choice' && b.completed).length;
-    
+
     categoryChart = new Chart(ctx, {
         type: 'bar',
         data: {
