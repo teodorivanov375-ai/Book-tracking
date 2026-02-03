@@ -788,9 +788,7 @@ body.dark-mode .delete-log-btn:hover {
 }
 
 /* Books Section */
-.books-section {
-    /* Removed conflicting styles - inherits from .tab-content */
-}
+/* .books-section styles removed */
 
 .books-section h2 {
     margin-bottom: 20px;
@@ -1957,21 +1955,30 @@ body.dark-mode .log-entry {
     color: #ff9800;
 }
 
-/* Expected Progress Marker */
+/* Expected Progress Marker (Base Styles) */
 .expected-progress-marker {
     position: absolute;
-    bottom: 100%;
-    margin-bottom: -10px;
+    /* Center horizontally */
     transform: translateX(-50%);
-    font-size: 1.5em;
+    font-size: 1.8em;
     cursor: help;
     z-index: 10;
-    animation: bounce 2s infinite;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
+/* Pin Marker (Standard Progress) - Position ABOVE */
+.expected-progress-marker:not(.buffer-marker) {
+    bottom: 25px;
+    /* Sits on top edge with slight overlap */
+    animation: bounce 2s infinite;
+}
+
+/* Buffer Marker (Clock) - Position BELOW */
 .buffer-marker {
-    font-size: 1.3em;
+    top: 25px;
+    /* Sits on bottom edge with slight overlap */
+    font-size: 1.5em;
     animation: none;
 }
 
@@ -1984,6 +1991,14 @@ body.dark-mode .log-entry {
 
 .progress-bar-container {
     position: relative;
+    height: 30px;
+    overflow: visible !important;
+    background-color: #e9ecef;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    /* Space for bottom marker */
+    margin-top: 15px;
+    /* Space for top marker */
 }
 
 .form-help {

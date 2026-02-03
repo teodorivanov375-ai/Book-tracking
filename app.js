@@ -808,23 +808,10 @@ function renderProjectBooksList(listId, searchId, typeRadioName, selectedBookIds
     const selectedTypeRadio = document.querySelector(`input[name="${typeRadioName}"]:checked`);
 
     // Return early if elements don't exist yet
-    if (!listContainer || !selectedTypeRadio) {
-        console.log('renderProjectBooksList: Missing elements', { listContainer, selectedTypeRadio });
-        return;
-    }
+    if (!listContainer || !selectedTypeRadio) return;
 
     const selectedType = selectedTypeRadio.value;
     const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
-
-    console.log('renderProjectBooksList called:', {
-        listId,
-        searchId,
-        typeRadioName,
-        selectedBookIds,
-        selectedType,
-        searchQuery,
-        totalBooks: books.length
-    });
 
     // Filter books by type and search query, exclude completed books
     const availableBooks = books.filter(book => {
@@ -834,11 +821,7 @@ function renderProjectBooksList(listId, searchId, typeRadioName, selectedBookIds
         return true;
     }).sort(naturalSort);
 
-    console.log('Available books after filtering:', availableBooks.length);
-    console.log('Selected book IDs:', selectedBookIds);
-
     if (availableBooks.length === 0) {
-        console.log('No available books - showing message');
         listContainer.innerHTML = '<div class="no-books">Няма налични книги от този тип</div>';
         return;
     }
@@ -849,8 +832,6 @@ function renderProjectBooksList(listId, searchId, typeRadioName, selectedBookIds
         bookItem.className = 'project-book-item';
 
         const isSelected = selectedBookIds.includes(book.id);
-
-        console.log(`Rendering book: ${book.name}, ID: ${book.id}, Selected: ${isSelected}`);
 
         bookItem.innerHTML = `
             <input type="checkbox" class="book-checkbox" data-book-id="${book.id}" ${isSelected ? 'checked' : ''}>
@@ -918,10 +899,6 @@ function openEditProjectModal(projectId) {
         radio.checked = radio.value === project.type;
     });
 
-    console.log('Opening edit modal for project:', project);
-    console.log('Project bookIds:', project.bookIds);
-    console.log('Project type:', project.type);
-
     // Show modal FIRST so DOM elements are accessible
     document.getElementById('edit-project-modal').style.display = 'block';
 
@@ -929,8 +906,6 @@ function openEditProjectModal(projectId) {
     setTimeout(() => {
         document.getElementById('edit-project-book-search').value = '';
         renderProjectBooksList('edit-project-books-list', 'edit-project-book-search', 'edit-project-type', project.bookIds);
-
-        console.log('After rendering book list');
 
         // Disable type radios AFTER rendering the book list
         typeRadios.forEach(radio => {
@@ -1250,6 +1225,8 @@ function createProjectCard(project) {
 
     // Expected progress indicator
     let expectedProgressHTML = '';
+    let progressMarkers = '';
+
     if (project.startDate && project.endDate) {
         const expectedPercentageWithBuffer = project.getExpectedProgressPercentageWithBuffer();
         const isAhead = percentage >= expectedPercentage;
@@ -1268,6 +1245,10 @@ function createProjectCard(project) {
                 <span>${statusEmoji} ${project.bufferDays > 0 ? `С буфер: ${expectedPercentageWithBuffer}% | Без буфер: ${expectedPercentage}%` : `Очаквано: ${expectedPercentage}%`} | Действително: ${percentage}% - ${statusText}</span>
             </div>
             ${bufferInfo}
+        `;
+
+        // Markers to be placed inside progress bar container
+        progressMarkers = `
             ${project.bufferDays > 0 ? `<div class="expected-progress-marker buffer-marker" style="left: ${expectedPercentageWithBuffer}%" title="Очакван прогрес с буфер: ${expectedPercentageWithBuffer}%">
                 ⏰
             </div>` : ''}
@@ -1303,6 +1284,7 @@ function createProjectCard(project) {
                 <span>${remainingText}</span>
             </div>
             <div class="progress-bar-container">
+                ${progressMarkers}
                 <div class="progress-bar" style="width: ${percentage}%; background: ${getProgressGradient(percentage)}">
                     ${percentage}%
                 </div>
