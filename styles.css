@@ -28,6 +28,7 @@ body.dark-mode {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -35,29 +36,63 @@ body.dark-mode {
 }
 
 @keyframes celebrate {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(1.2) rotate(-10deg); }
-    75% { transform: scale(1.2) rotate(10deg); }
+
+    0%,
+    100% {
+        transform: scale(1) rotate(0deg);
+    }
+
+    25% {
+        transform: scale(1.2) rotate(-10deg);
+    }
+
+    75% {
+        transform: scale(1.2) rotate(10deg);
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 @keyframes shimmer {
-    0% { background-position: -1000px 0; }
-    100% { background-position: 1000px 0; }
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
 }
 
 @keyframes confetti {
-    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(-500px) rotate(720deg); opacity: 0; }
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-500px) rotate(720deg);
+        opacity: 0;
+    }
 }
 
 body {
@@ -96,7 +131,8 @@ header h1 {
     align-items: flex-start;
 }
 
-.theme-toggle, .color-picker-toggle {
+.theme-toggle,
+.color-picker-toggle {
     background: rgba(255, 255, 255, 0.2);
     border: none;
     border-radius: 50%;
@@ -107,7 +143,8 @@ header h1 {
     transition: all 0.3s;
 }
 
-.theme-toggle:hover, .color-picker-toggle:hover {
+.theme-toggle:hover,
+.color-picker-toggle:hover {
     background: rgba(255, 255, 255, 0.3);
     transform: scale(1.1) rotate(10deg);
 }
@@ -145,6 +182,7 @@ header h1 {
     border-color: white;
     box-shadow: 0 0 0 2px var(--text-primary);
 }
+
 /* Streak Display */
 .streak-container {
     display: flex;
@@ -732,7 +770,7 @@ body.dark-mode .delete-log-btn:hover {
 .status-option:hover {
     background: #e9ecef;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .status-option.active {
@@ -989,7 +1027,7 @@ body.dark-mode .delete-log-btn:hover {
     min-width: 0;
 }
 
-.book-info > div {
+.book-info>div {
     flex: 1;
     min-width: 0;
 }
@@ -1095,8 +1133,13 @@ body.dark-mode .delete-log-btn:hover {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
@@ -1117,6 +1160,7 @@ body.dark-mode .delete-log-btn:hover {
         transform: translateY(-50px);
         opacity: 0;
     }
+
     to {
         transform: translateY(0);
         opacity: 1;
@@ -1407,6 +1451,7 @@ body.dark-mode .log-entry {
         width: 100%;
     }
 }
+
 /* New Statistics Tab */
 .stats-overview {
     display: grid;
@@ -1625,11 +1670,25 @@ body.dark-mode .log-entry {
     z-index: 10000;
 }
 
-.confetti:nth-child(1) { background: #ff6b6b; }
-.confetti:nth-child(2) { background: #4ecdc4; }
-.confetti:nth-child(3) { background: #45b7d1; }
-.confetti:nth-child(4) { background: #f7dc6f; }
-.confetti:nth-child(5) { background: #bb8fce; }
+.confetti:nth-child(1) {
+    background: #ff6b6b;
+}
+
+.confetti:nth-child(2) {
+    background: #4ecdc4;
+}
+
+.confetti:nth-child(3) {
+    background: #45b7d1;
+}
+
+.confetti:nth-child(4) {
+    background: #f7dc6f;
+}
+
+.confetti:nth-child(5) {
+    background: #bb8fce;
+}
 
 /* Achievement celebration */
 .achievement-unlocked {
@@ -1677,6 +1736,7 @@ body.dark-mode .log-entry {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1688,6 +1748,7 @@ body.dark-mode .log-entry {
         transform: translateX(-100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -1699,6 +1760,7 @@ body.dark-mode .log-entry {
         transform: scale(0.8);
         opacity: 0;
     }
+
     to {
         transform: scale(1);
         opacity: 1;
@@ -1721,10 +1783,21 @@ body.dark-mode .log-entry {
     animation: fadeIn 0.6s ease-out;
 }
 
-.stat-box:nth-child(1) { animation-delay: 0.1s; }
-.stat-box:nth-child(2) { animation-delay: 0.2s; }
-.stat-box:nth-child(3) { animation-delay: 0.3s; }
-.stat-box:nth-child(4) { animation-delay: 0.4s; }
+.stat-box:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.stat-box:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.stat-box:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.stat-box:nth-child(4) {
+    animation-delay: 0.4s;
+}
 
 /* Progress bar animation */
 .progress-bar {
@@ -1770,9 +1843,12 @@ body.dark-mode .log-entry {
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }
@@ -1884,16 +1960,38 @@ body.dark-mode .log-entry {
 /* Expected Progress Marker */
 .expected-progress-marker {
     position: absolute;
-    top: -25px;
+    bottom: 100%;
+    margin-bottom: -10px;
     transform: translateX(-50%);
-    font-size: 1.2em;
+    font-size: 1.5em;
     cursor: help;
     z-index: 10;
     animation: bounce 2s infinite;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.buffer-marker {
+    font-size: 1.3em;
+    animation: none;
+}
+
+.buffer-info {
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-bottom: 5px;
+    font-style: italic;
 }
 
 .progress-bar-container {
     position: relative;
+}
+
+.form-help {
+    display: block;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-top: 5px;
+    font-style: italic;
 }
 
 /* Project Books Expanded */

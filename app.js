@@ -45,7 +45,7 @@ class Book {
 
 // Project class to represent a collection of books
 class Project {
-    constructor(id, name, type, category, bookIds = [], startDate = null, endDate = null) {
+    constructor(id, name, type, category, bookIds = [], startDate = null, endDate = null, bufferDays = 0) {
         this.id = id;
         this.name = name;
         this.type = type; // 'paper' or 'audio'
@@ -53,6 +53,7 @@ class Project {
         this.bookIds = bookIds; // array of book IDs
         this.startDate = startDate; // ISO date string
         this.endDate = endDate; // ISO date string
+        this.bufferDays = bufferDays || 0; // buffer days before end date
         this.expanded = false; // UI state for expand/collapse
     }
 
@@ -115,6 +116,15 @@ class Project {
         const total = this.getTotalPages();
         const expectedPercentage = this.getExpectedProgressPercentage();
         return Math.round((total * expectedPercentage) / 100);
+    }
+
+    getExpectedProgressPercentageWithBuffer() {
+        const totalDays = this.getTotalDays();
+        if (totalDays === 0) return 0;
+        const effectiveDays = Math.max(totalDays - this.bufferDays, 1);
+        const daysElapsed = this.getDaysElapsed();
+        const expectedPercentage = Math.min((daysElapsed / effectiveDays) * 100, 100);
+        return Math.round(expectedPercentage);
     }
 }
 
@@ -782,6 +792,7 @@ function openCreateProjectModal() {
     document.getElementById('project-name').value = '';
     document.getElementById('project-start-date').value = '';
     document.getElementById('project-end-date').value = '';
+    document.getElementById('project-buffer-days').value = '0';
     document.querySelector('input[name="project-category"][value="mama"]').checked = true;
     document.querySelector('input[name="project-type"][value="paper"]').checked = true;
     document.getElementById('project-book-search').value = '';
@@ -794,8 +805,26 @@ function openCreateProjectModal() {
 function renderProjectBooksList(listId, searchId, typeRadioName, selectedBookIds = []) {
     const listContainer = document.getElementById(listId);
     const searchInput = document.getElementById(searchId);
-    const selectedType = document.querySelector(`input[name="${typeRadioName}"]:checked`).value;
+    const selectedTypeRadio = document.querySelector(`input[name="${typeRadioName}"]:checked`);
+
+    // Return early if elements don't exist yet
+    if (!listContainer || !selectedTypeRadio) {
+        console.log('renderProjectBooksList: Missing elements', { listContainer, selectedTypeRadio });
+        return;
+    }
+
+    const selectedType = selectedTypeRadio.value;
     const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+
+    console.log('renderProjectBooksList called:', {
+        listId,
+        searchId,
+        typeRadioName,
+        selectedBookIds,
+        selectedType,
+        searchQuery,
+        totalBooks: books.length
+    });
 
     // Filter books by type and search query, exclude completed books
     const availableBooks = books.filter(book => {
@@ -805,7 +834,11 @@ function renderProjectBooksList(listId, searchId, typeRadioName, selectedBookIds
         return true;
     }).sort(naturalSort);
 
+    console.log('Available books after filtering:', availableBooks.length);
+    console.log('Selected book IDs:', selectedBookIds);
+
     if (availableBooks.length === 0) {
+        console.log('No available books - showing message');
         listContainer.innerHTML = '<div class="no-books">Няма налични книги от този тип</div>';
         return;
     }
@@ -816,6 +849,8 @@ function renderProjectBooksList(listId, searchId, typeRadioName, selectedBookIds
         bookItem.className = 'project-book-item';
 
         const isSelected = selectedBookIds.includes(book.id);
+
+        console.log(`Rendering book: ${book.name}, ID: ${book.id}, Selected: ${isSelected}`);
 
         bookItem.innerHTML = `
             <input type="checkbox" class="book-checkbox" data-book-id="${book.id}" ${isSelected ? 'checked' : ''}>
@@ -837,7 +872,8 @@ function handleCreateProject(e) {
     const name = document.getElementById('project-name').value.trim();
     const startDate = document.getElementById('project-start-date').value || null;
     const endDate = document.getElementById('project-end-date').value || null;
-    const category = document.querySelector('input[name="project-category"]:checked').value;
+    const bufferDays = parseInt(document.getElementById('project-buffer-days').value) || 0;
+    const category = currentCategoryFilter || 'mama'; // Use current filter
     const type = document.querySelector('input[name="project-type"]:checked').value;
 
     // Get selected books
@@ -855,7 +891,7 @@ function handleCreateProject(e) {
     }
 
     const id = Date.now().toString();
-    const project = new Project(id, name, type, category, bookIds, startDate, endDate);
+    const project = new Project(id, name, type, category, bookIds, startDate, endDate, bufferDays);
     projects.push(project);
     saveProjects();
     renderBooks();
@@ -873,24 +909,34 @@ function openEditProjectModal(projectId) {
     document.getElementById('edit-project-name').value = project.name;
     document.getElementById('edit-project-start-date').value = project.startDate || '';
     document.getElementById('edit-project-end-date').value = project.endDate || '';
-
-    // Set category
-    const categoryRadios = document.querySelectorAll('input[name="edit-project-category"]');
-    categoryRadios.forEach(radio => {
-        radio.checked = radio.value === project.category;
-    });
+    document.getElementById('edit-project-buffer-days').value = project.bufferDays || 0;
 
     // Note: Type cannot be changed in edit mode, so we'll just display it
     // For simplicity, we'll keep the type selector but disable it
     const typeRadios = document.querySelectorAll('input[name="edit-project-type"]');
     typeRadios.forEach(radio => {
         radio.checked = radio.value === project.type;
-        radio.disabled = true; // Can't change type after creation
     });
 
-    document.getElementById('edit-project-book-search').value = '';
-    renderProjectBooksList('edit-project-books-list', 'edit-project-book-search', 'edit-project-type', project.bookIds);
+    console.log('Opening edit modal for project:', project);
+    console.log('Project bookIds:', project.bookIds);
+    console.log('Project type:', project.type);
+
+    // Show modal FIRST so DOM elements are accessible
     document.getElementById('edit-project-modal').style.display = 'block';
+
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+        document.getElementById('edit-project-book-search').value = '';
+        renderProjectBooksList('edit-project-books-list', 'edit-project-book-search', 'edit-project-type', project.bookIds);
+
+        console.log('After rendering book list');
+
+        // Disable type radios AFTER rendering the book list
+        typeRadios.forEach(radio => {
+            radio.disabled = true; // Can't change type after creation
+        });
+    }, 10);
 }
 
 // Handle edit project
@@ -904,7 +950,8 @@ function handleEditProject(e) {
     const name = document.getElementById('edit-project-name').value.trim();
     const startDate = document.getElementById('edit-project-start-date').value || null;
     const endDate = document.getElementById('edit-project-end-date').value || null;
-    const category = document.querySelector('input[name="edit-project-category"]:checked').value;
+    const bufferDays = parseInt(document.getElementById('edit-project-buffer-days').value) || 0;
+    // Keep the existing category - don't change it
 
     // Get selected books
     const selectedCheckboxes = document.querySelectorAll('#edit-project-books-list .book-checkbox:checked');
@@ -923,7 +970,8 @@ function handleEditProject(e) {
     project.name = name;
     project.startDate = startDate;
     project.endDate = endDate;
-    project.category = category;
+    project.bufferDays = bufferDays;
+    // Category stays the same
     project.bookIds = bookIds;
 
     saveProjects();
@@ -1203,16 +1251,27 @@ function createProjectCard(project) {
     // Expected progress indicator
     let expectedProgressHTML = '';
     if (project.startDate && project.endDate) {
+        const expectedPercentageWithBuffer = project.getExpectedProgressPercentageWithBuffer();
         const isAhead = percentage >= expectedPercentage;
-        const statusEmoji = isAhead ? '🎯' : '⚠️';
-        const statusText = isAhead ? 'Напред сте!' : 'Изоставате';
-        const statusClass = isAhead ? 'ahead' : 'behind';
+        const isAheadWithBuffer = percentage >= expectedPercentageWithBuffer;
+        const statusEmoji = isAheadWithBuffer ? '🎯' : '⚠️';
+        const statusText = isAheadWithBuffer ? 'Напред сте!' : 'Изоставате';
+        const statusClass = isAheadWithBuffer ? 'ahead' : 'behind';
+
+        let bufferInfo = '';
+        if (project.bufferDays > 0) {
+            bufferInfo = `<div class="buffer-info">Буфер: ${project.bufferDays} дни</div>`;
+        }
 
         expectedProgressHTML = `
             <div class="progress-comparison ${statusClass}">
-                <span>${statusEmoji} Очаквано: ${expectedPercentage}% | Действително: ${percentage}% - ${statusText}</span>
+                <span>${statusEmoji} ${project.bufferDays > 0 ? `С буфер: ${expectedPercentageWithBuffer}% | Без буфер: ${expectedPercentage}%` : `Очаквано: ${expectedPercentage}%`} | Действително: ${percentage}% - ${statusText}</span>
             </div>
-            <div class="expected-progress-marker" style="left: ${expectedPercentage}%" title="Очакван прогрес: ${expectedPercentage}%">
+            ${bufferInfo}
+            ${project.bufferDays > 0 ? `<div class="expected-progress-marker buffer-marker" style="left: ${expectedPercentageWithBuffer}%" title="Очакван прогрес с буфер: ${expectedPercentageWithBuffer}%">
+                ⏰
+            </div>` : ''}
+            <div class="expected-progress-marker" style="left: ${expectedPercentage}%" title="Очакван прогрес ${project.bufferDays > 0 ? 'без буфер' : ''}: ${expectedPercentage}%">
                 📍
             </div>
         `;
@@ -1229,9 +1288,6 @@ function createProjectCard(project) {
                         ${project.type === 'paper' ? '📖 Хартиени книги' : '🎧 Аудио книги'} • ${totalText} • ${project.getBooks().length} книги
                     </span>
                 </div>
-            </div>
-            <div class="project-expand-icon">
-                ${project.expanded ? '▼' : '▶'}
             </div>
         </div>
 

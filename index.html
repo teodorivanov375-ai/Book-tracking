@@ -472,21 +472,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Категория:</label>
-                    <div class="radio-group">
-                        <label>
-                            <input type="radio" name="project-category" value="mama" checked>
-                            Уговорка с Мама
-                        </label>
-                        <label>
-                            <input type="radio" name="project-category" value="yavor">
-                            Уговорка с Явор
-                        </label>
-                        <label>
-                            <input type="radio" name="project-category" value="choice">
-                            По желание
-                        </label>
-                    </div>
+                    <label for="project-buffer-days">Буфер (дни):</label>
+                    <input type="number" id="project-buffer-days" min="0" value="0"
+                        placeholder="Брой дни преди крайния срок">
+                    <small class="form-help">Колко дни преди крайния срок искате да завършите проекта</small>
                 </div>
 
                 <div class="form-group">
@@ -549,21 +538,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Категория:</label>
+                    <label for="edit-project-buffer-days">Буфер (дни):</label>
+                    <input type="number" id="edit-project-buffer-days" min="0" value="0"
+                        placeholder="Брой дни преди крайния срок">
+                    <small class="form-help">Колко дни преди крайния срок искате да завършите проекта</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Тип книги:</label>
                     <div class="radio-group">
                         <label>
-                            <input type="radio" name="edit-project-category" value="mama">
-                            Уговорка с Мама
+                            <input type="radio" name="edit-project-type" value="paper">
+                            📖 Хартиени книги
                         </label>
                         <label>
-                            <input type="radio" name="edit-project-category" value="yavor">
-                            Уговорка с Явор
-                        </label>
-                        <label>
-                            <input type="radio" name="edit-project-category" value="choice">
-                            По желание
+                            <input type="radio" name="edit-project-type" value="audio">
+                            🎧 Аудио книги
                         </label>
                     </div>
+                    <small class="form-help">Типът не може да бъде променен след създаване</small>
                 </div>
 
                 <div class="form-group">
